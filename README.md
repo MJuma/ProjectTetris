@@ -1,4 +1,4 @@
-# Project Tetris - Fall 2012
+# Project Tetris
 Graphical Game of Tetris in Java.
 
 ![Tetris](http://i.imgur.com/kUmPGN1.png)
