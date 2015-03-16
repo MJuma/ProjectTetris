@@ -1,0 +1,221 @@
+/*
+ * Mohammad Juma
+ * 
+ * TCSS 305 - Autumn 2012
+ * Project Tetris
+ * October 26, 2012
+ */
+
+package tetris.pieces;
+
+import java.util.Arrays;
+
+/**
+ * Parent class for all Tetrominos.
+ * @author Mohammad Juma
+ * @version 10-26-2012
+ */
+public class Tetromino implements MutablePiece
+{
+  /**
+   * Number of rows in tetromino matrix.
+   */
+  private final int my_rows;
+
+  /**
+   * Number of columns in tetromino matrix.
+   */
+  private final int my_columns;
+
+  /**
+   * Matrix representation of the tetromino using 1's and 0's.
+   */
+  private int[][] my_matrix;
+
+  /**
+   * Positions of each block in the tetromino.
+   */
+  private int[][] my_block_positions = new int[4][2];
+
+  /**
+   * The tetromino's current x position.
+   */
+  private int my_x;
+
+  /**
+   * The tetromino's current y position.
+   */
+  private int my_y;
+
+  /**
+   * Constructs a new tetromino.
+   * @param the_x The initial x position
+   * @param the_y The initial y position
+   * @param the_matrix Initial tetromino matrix representation
+   */
+  public Tetromino(final int the_x, final int the_y, final int[][] the_matrix)
+  {
+    my_x = the_x;
+    my_y = the_y;
+    my_rows = the_matrix.length;
+    my_columns = the_matrix[0].length;
+    my_matrix = new int[my_rows][my_columns];
+    System.arraycopy(the_matrix, 0, my_matrix, 0, the_matrix.length);
+    findBlockPositions();
+  }
+
+  /** 
+   * Moves this tetromino one space to the left. 
+   */
+  public void moveLeft()
+  {
+    my_x--;
+  }
+
+  /** 
+   * Moves this tetromino one space to the right. 
+   */
+  public void moveRight()
+  {
+    my_x++;
+  }
+
+  /** 
+   * Moves this tetromino one space down. 
+   */
+  public void moveDown()
+  {
+    my_y++;
+  }
+
+  /** 
+   * Rotates this tetromino one quarter turn counter-clockwise. 
+   */
+  public void rotate()
+  {
+    final int[][] matrix = new int[my_columns][my_rows];
+
+    for (int m = 0; m < my_rows; m++)
+    {
+      for (int n = 0; n < my_columns; n++)
+      {
+        matrix[m][n] = my_matrix[m][n];
+      }
+    }
+
+    int row = 0;
+    int col = my_columns - 1;
+    for (int r = 0; r < my_columns; r++)
+    {
+      for (int c = 0; c < my_rows; c++)
+      {
+        my_matrix[r][c] = matrix[row++][col];
+
+      }
+      row = 0;
+      col--;
+    }
+    findBlockPositions();
+  }
+
+  /** 
+   * Rotates this tetromino one quarter turn clockwise. 
+   */
+  public void rotateCW()
+  {
+    final int[][] matrix = new int[my_columns][my_rows];
+
+    for (int m = 0; m < my_rows; m++)
+    {
+      for (int n = 0; n < my_columns; n++)
+      {
+        matrix[m][n] = my_matrix[m][n];
+      }
+    }
+
+    for (int m = 0; m < my_rows; m++)
+    {
+      for (int n = 0; n < my_columns; n++)
+      {
+        my_matrix[n][my_rows - 1 - m] = matrix[m][n];
+      }
+    }
+    findBlockPositions();
+  }
+
+  /**
+   * @return the x coordinate of this tetromino.
+   */
+  public int x()
+  {
+    return my_x;
+  }
+
+  /**
+   * @return the y coordinate of this tetromino.
+   */
+  public int y()
+  {
+    return my_y;
+  }
+
+  /**
+   * Finds the position of each block in the tetromino.
+   */
+  private void findBlockPositions()
+  {
+    for (int m = 0; m < my_rows; m++)
+    {
+      for (int n = 0; n < my_columns; n++)
+      {
+        switch (my_matrix[m][n])
+        {
+          case 1:
+            my_block_positions[0][0] = m;
+            my_block_positions[0][1] = n;
+            break;
+          case 2:
+            my_block_positions[1][0] = m;
+            my_block_positions[1][1] = n;
+            break;
+          case 3:
+            my_block_positions[2][0] = m;
+            my_block_positions[2][1] = n;
+            break;
+          case 4:
+            my_block_positions[3][0] = m;
+            my_block_positions[3][1] = n;
+            break;
+          default:
+            break;
+        }
+      }
+    }
+  }
+
+  /**
+   * A 2d array with the points for all four blocks in the tetromino.
+   * @return my_block_positions
+   */
+  public int[][] blockPositions()
+  {
+    //return my_block_positions; TODO
+    return (int[][]) my_block_positions.clone();
+  }
+
+  /**
+   * Returns a string representation of the tetromino.
+   * @return sb.toString()
+   */
+  public String toString()
+  {
+    final StringBuilder sb = new StringBuilder();
+
+    for (int[] row: my_matrix)
+    {
+      sb.append(Arrays.toString(row));
+      sb.append('\n');
+    }
+    return sb.toString();
+  }
+}

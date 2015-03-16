@@ -1,0 +1,363 @@
+/*
+ * Mohammad Juma
+ * 
+ * TCSS 305 - Autumn 2012
+ * Project Tetris
+ * November 11, 2012
+ */
+
+package tetris.baord;
+
+
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import tetris.pieces.Tetrominos;
+
+import static org.junit.Assert.assertEquals;
+
+
+
+/**
+ * Tests the tetris project game board.
+ * @author Mohammad Juma
+ * @version 11-12-2012
+ */
+public class BoardTest
+{ 
+  /**
+   * The Tetrominos used for determining the expected result in the non adjacent test.
+   */
+  private final List<Tetrominos> my_result_tetrominos = new ArrayList<Tetrominos>();
+  
+  /**
+   * The Tetrominos use for determining the actual result in the non adjacent test.
+   */
+  private final List<Tetrominos> my_tetrominos = new ArrayList<Tetrominos>();
+
+  /**
+   * The Tetrominos use for the 30 sequence test.
+   */
+  private final List<Tetrominos> my_sequence_tetrominos = new ArrayList<Tetrominos>();
+  
+  /**
+   * Initializes the Tetrominos needed in the nonAdjacentLines test.
+   */
+  @Before
+  public void initializeNonAdjacent()
+  {
+    my_result_tetrominos.add(Tetrominos.I);
+    my_result_tetrominos.add(Tetrominos.I);
+    my_result_tetrominos.add(Tetrominos.J);
+    
+    my_tetrominos.add(Tetrominos.T);
+    my_tetrominos.add(Tetrominos.Z);
+    my_tetrominos.add(Tetrominos.Z);
+    my_tetrominos.add(Tetrominos.Z);
+    my_tetrominos.add(Tetrominos.L);
+    my_tetrominos.add(Tetrominos.I);
+    my_tetrominos.add(Tetrominos.O);
+    my_tetrominos.add(Tetrominos.I);
+  }
+  
+  /**
+   * 
+   */
+  @Before
+  public void initialize30Tetrominos()
+  {
+    for (int i = 0; i < 20; i++)
+    {
+      my_sequence_tetrominos.add(Tetrominos.I);
+    }
+    for (int i = 0; i < 10; i++)
+    {
+      my_sequence_tetrominos.add(Tetrominos.O);
+    }
+  }
+  
+  /**
+   * Tests creating an empty game board.
+   * This is done but creating a 2D array that would represent an 
+   * empty board and checking it against an actual empty board.
+   * This also checks toString.
+   */
+  @Test
+  public void emptyBoard()
+  {
+    final int[][] expected_board = new int[20][10];
+    final StringBuilder sb = new StringBuilder();
+    for (int[] row: expected_board)
+    {
+      sb.append(Arrays.toString(row));
+      sb.append('\n');
+    }
+    final String expected = sb.toString();
+
+    final Board board = new Board();
+    final String actual = board.toString();
+
+    assertEquals("Empty board is empty.", expected, actual);
+  }
+
+  /**
+   * Tests providing a fixed sequence of 30 Tetrominos.
+   * All the blocks should be cleared and the board should 
+   * resemble an empty board.
+   */
+  @Test
+  public void fixedSequence()
+  {
+    Board board = new Board();
+    final String empty_board = board.toString();
+    board.setTetrominos(my_sequence_tetrominos);
+    
+    for (int i = 0; i < 10; i++)
+    {
+      board = moveLeftInfinitely(board);
+      for (int j = 0; j < i; j++)
+      {
+        board.moveRight();
+      }
+      board = stepInfinitely(board);
+    }
+    
+    for (int i = 0; i < 10; i++)
+    {
+      board = moveLeftInfinitely(board);
+      for (int j = 0; j < i; j++)
+      {
+        board.moveRight();
+      }
+      board = stepInfinitely(board);
+    }
+    
+    for (int i = 0; i < 5; i++)
+    {
+      board = moveLeftInfinitely(board);
+      for (int j = 0; j < i; j++)
+      {
+        board.moveRight();
+        board.moveRight();
+      }
+      board = stepInfinitely(board);
+    }
+    
+    for (int i = 0; i < 5; i++)
+    {
+      board = moveLeftInfinitely(board);
+      for (int j = 0; j < i; j++)
+      {
+        board.moveRight();
+        board.moveRight();
+      }
+      board = stepInfinitely(board);
+    }
+    
+    assertEquals("Cleared board after 30 sequences.", empty_board, board.toString());
+  }
+
+  /**
+   * Tests clearing a single line.
+   * This is done by creating a board with a width divisible by 4 
+   * and filling a row with Tetromino pieces.
+   * The board should be empty after clearing the line.
+   */
+  @Test
+  public void individualLines()
+  {
+    Board board = new Board(8, 5);
+    final String empty_board = board.toString();
+    final List<Tetrominos> tetrominos = new ArrayList<Tetrominos>();
+    tetrominos.add(Tetrominos.I);
+    tetrominos.add(Tetrominos.I);
+    board.setTetrominos(tetrominos);
+
+    board.rotate();
+    board = moveLeftInfinitely(board);
+    board = stepInfinitely(board);
+
+    board.rotate();
+    board = moveRightInfinitely(board);
+    board = stepInfinitely(board);
+
+    assertEquals("Clearing singel lines", empty_board, board.toString());
+  }
+
+
+
+  /**
+   * Tests clearing a single line.
+   * This is done by creating a board with a width divisible by 4 
+   * and filling the left 4 columns with two rows of blocks.
+   * Then an O piece is placed on the far right side, filling the 
+   * right 2 columns with two rows of blocks. Finally a second O piece 
+   * is dropped in between clearing both rows.
+   */
+  @Test
+  public void multipleLines()
+  {
+    Board board = new Board(8, 5);
+    final String expected_board = board.toString();
+    final List<Tetrominos> tetrominos = new ArrayList<Tetrominos>();
+    tetrominos.add(Tetrominos.I);
+    tetrominos.add(Tetrominos.I);
+    tetrominos.add(Tetrominos.O);
+    tetrominos.add(Tetrominos.O);
+    board.setTetrominos(tetrominos);
+
+    board.rotate();
+    board = moveLeftInfinitely(board);
+    board = stepInfinitely(board);
+
+    board.rotate();
+    board = moveLeftInfinitely(board);
+    board = stepInfinitely(board);
+
+    board = moveRightInfinitely(board);
+    board = stepInfinitely(board);
+
+    board = moveRightInfinitely(board);
+    board.moveLeft();
+    board.moveLeft();
+    board = stepInfinitely(board);
+
+    assertEquals("Clearing mutliple lines", expected_board, board.toString());
+  }
+  
+  /**
+   * Tests clearing multiple non adjacent lines.
+   * This is done using magic.
+   */
+  @Test
+  public void nonAdjacentLines()
+  {
+    Board result_board = new Board();
+    result_board.setTetrominos(my_result_tetrominos);
+
+    result_board.rotate();
+    result_board = moveLeftInfinitely(result_board);
+    result_board = stepInfinitely(result_board);
+
+    result_board.rotate();
+    result_board = moveRightInfinitely(result_board);
+    result_board.moveLeft();
+    result_board.moveLeft();
+    result_board = stepInfinitely(result_board);
+
+    result_board.rotate();
+    result_board = moveRightInfinitely(result_board);
+    result_board = stepInfinitely(result_board);
+
+    final String expected_board = result_board.toString();
+
+
+    Board board = new Board();
+
+    board.setTetrominos(my_tetrominos);
+
+    board = moveLeftInfinitely(board);
+    board = stepInfinitely(board);
+
+    board = moveLeftInfinitely(board);
+    for (int i = 0; i < 2; i++)
+    {
+      board.moveRight();
+    }
+    board = stepInfinitely(board);
+
+    board = moveLeftInfinitely(board);
+    for (int i = 0; i < 4; i++)
+    {
+      board.moveRight();
+    }
+    board = stepInfinitely(board);
+
+    board = moveLeftInfinitely(board);
+    for (int i = 0; i < 6; i++)
+    {
+      board.moveRight();
+    }
+    board = stepInfinitely(board);
+
+    board.rotate();
+    board.rotate();
+    board.rotate();
+    board = moveLeftInfinitely(board);
+    board = stepInfinitely(board);
+
+    board.rotate();
+    board = moveLeftInfinitely(board);
+    board.moveRight();
+    board.moveRight();
+    board.moveRight();
+    board = stepInfinitely(board);
+
+
+    board = moveRightInfinitely(board);
+    board.moveLeft();
+    board = stepInfinitely(board);
+
+
+    board = moveRightInfinitely(board);
+    board = stepInfinitely(board);
+
+    assertEquals("Clearing non adjacent lines", expected_board, board.toString());
+  }
+
+  /**
+   * Steps the board infinitely until it can't step anymore.
+   * @param the_board The board to step.
+   * @return the_board A stepped board.
+   */
+  private Board stepInfinitely(final Board the_board)
+  {
+    while (true)
+    {
+      if (!the_board.step())
+      {
+        break;
+      }
+    }
+    return the_board;
+  }
+
+  /**
+   * Moves the board infinitely left until it can't move left anymore.
+   * @param the_board The board to move left.
+   * @return the_board A moved board.
+   */
+  private Board moveLeftInfinitely(final Board the_board)
+  {
+    while (true)
+    {
+      if (!the_board.moveLeft())
+      {
+        break;
+      }
+    }
+    return the_board;
+  }
+
+  /**
+   * Moves the board infinitely right until it can't move right anymore.
+   * @param the_board The board to move right.
+   * @return the_board A moved board.
+   */
+  private Board moveRightInfinitely(final Board the_board)
+  {
+    while (true)
+    {
+      if (!the_board.moveRight())
+      {
+        break;
+      }
+    }
+    return the_board;
+  }
+}

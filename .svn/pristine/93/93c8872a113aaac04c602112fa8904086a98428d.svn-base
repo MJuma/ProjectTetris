@@ -1,0 +1,199 @@
+/*
+ * Mohammad Juma
+ * 
+ * TCSS 305 - Autumn 2012
+ * Project Tetris
+ * November 22, 2012
+ */
+
+package tetris.gui;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.plaf.LayerUI;
+
+import tetris.board.Board;
+
+/**
+ * Holds the actions for changing the game.
+ * 
+ * @author Mohammad Juma
+ * @version 11-22-2012
+ */
+public class TetrisActions
+{
+  /**
+   * Action for starting a new game, checks
+   *  to see if a game is running first.
+   */
+  private Action my_new_game;
+  
+  /**
+   * Toggled the game from paused to unpaused.
+   */
+  private Action my_toggle_game;
+  
+  /**
+   * Ends the current game.
+   */
+  private Action my_end_game;
+  
+  /**
+   * The main frame.
+   */
+  private final TetrisGui my_frame;
+  
+  /**
+   * The game panel.
+   */
+  private final TetrisPanel my_game_panel;
+  
+  /**
+   * The game board.
+   */
+  private final Board my_board;
+  
+  /**
+   * The start/end game animation.
+   */
+  private final TetrisAnimation my_animation;
+  
+  /**
+   * Creates the game state actions for new games,
+   * toggling games and ending games.
+   * @param the_frame The main frame.
+   * @param the_board The game board.
+   * @param the_game_panel The game panel.
+   * @param the_animation The start/end game animation.
+   */
+  public TetrisActions(final TetrisGui the_frame, 
+                       final Board the_board,
+                       final TetrisPanel the_game_panel,
+                       final LayerUI<JPanel> the_animation)
+  {
+    my_frame = the_frame;
+    my_game_panel = the_game_panel;
+    my_board = the_board;
+    my_animation = (TetrisAnimation) the_animation;
+    initializeActions();
+  }
+  
+  /**
+   * Initializes the actions to their defaults.
+   */
+  @SuppressWarnings("serial")
+  private void initializeActions()
+  {
+    my_new_game = new AbstractAction("New Game")
+    {  
+      public void actionPerformed(final ActionEvent the_event)
+      {  
+        startNewGame();
+//        if (my_board.gameState())
+//        {
+//          final int choice = showEndGameDialog();
+//          if (choice == 1)
+//          {
+//            endGame();
+//            startNewGame();
+//          }
+//        }
+//        else
+//        {
+//          startNewGame();
+//        }
+      }
+    };
+    my_new_game.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_N);
+    my_new_game.putValue(Action.SHORT_DESCRIPTION, "Start a new game.");
+    
+    my_toggle_game = new AbstractAction("Toggle Game")
+    {  
+      public void actionPerformed(final ActionEvent the_event)
+      {  
+        my_game_panel.gameToggle();
+      }
+    };
+    my_toggle_game.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_T);
+    my_toggle_game.putValue(Action.SHORT_DESCRIPTION, "Resume/Pause the game.");
+    
+    my_end_game = new AbstractAction("End Game")
+    {  
+      public void actionPerformed(final ActionEvent the_event)
+      {  
+        if (my_board.gameState())
+        {
+          final int choice = showEndGameDialog();
+          if (choice == 1)
+          {
+            endGame();
+          }
+        }
+      }
+    };
+    my_end_game.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_E);
+    my_end_game.putValue(Action.SHORT_DESCRIPTION, "End the game.");
+  }
+  
+  /**
+   * Asks the user to confirm ending the game.
+   * @return The chosen value.
+   */
+  private int showEndGameDialog()
+  {
+    return JOptionPane.showConfirmDialog(my_frame, "Are you sure you want to end" +
+      " the current game?", "End Current Game?", JOptionPane.YES_NO_OPTION);
+  }
+  
+  /**
+   * Starts a new game.
+   */
+  private void startNewGame()
+  {
+    ((TetrisAnimation) my_animation).start();
+    if (!((TetrisAnimation) my_animation).isRunning()) 
+    {
+      ((TetrisAnimation) my_animation).startRunning();
+    }
+  }
+  
+  /**
+   * End the current game.
+   */
+  private void endGame()
+  {
+    my_game_panel.endGame();
+  }
+  
+  /**
+   * Returns the new game action.
+   * @return my_new_game
+   */
+  public Action getNewGame()
+  {
+    return my_new_game;
+  }
+  
+  /**
+   * Returns the toggle game action.
+   * @return my_toggle_game
+   */
+  public Action getToggleGame()
+  {
+    return my_toggle_game;
+  }
+  
+  /**
+   * Returns the end game action.
+   * @return my_end_game
+   */
+  public Action getEndGame()
+  {
+    return my_end_game;
+  }
+}

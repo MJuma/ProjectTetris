@@ -1,0 +1,64 @@
+/*
+ * Mohammad Juma
+ * 
+ * TCSS 305 - Autumn 2012
+ * Project Tetris
+ * November 11, 2012
+ */
+
+package tetris.baord;
+
+import org.junit.Test;
+
+/**
+ * Tests the tetris project game board.
+ * @author Mohammad Juma
+ * @version 11-12-2012
+ */
+public class BoardTest
+{
+  /**
+   * Tests creating an empty game board.
+   */
+  @Test
+  public void emptyBoard()
+  {
+    
+  }
+  
+  /**
+   * Tests providing a fixed sequence of 35 Tetrominos.
+   */
+  @Test
+  public void fixedSequence()
+  {
+    
+  }
+  
+  /**
+   * Tests clearing a single line.
+   */
+  @Test
+  public void individualLines()
+  {
+    
+  }
+  
+  /**
+   * Tests clearing multiple lines.
+   */
+  @Test
+  public void multipleLines()
+  {
+    
+  }
+  
+  /**
+   * Tests clearing multiple non adjacent lines.
+   */
+  @Test
+  public void NonAdjacentLines()
+  {
+    
+  }
+}

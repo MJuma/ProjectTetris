@@ -1,0 +1,229 @@
+/*
+ * Mohammad Juma
+ * 
+ * TCSS 305 - Autumn 2012
+ * Project Tetris
+ * November 22, 2012
+ */
+
+package tetris.gui;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
+
+import javax.swing.BoxLayout;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+import tetris.board.Board;
+import tetris.pieces.Tetromino;
+
+/**
+ * The Tetris Game GUI.
+ * 
+ * @author Mohammad Juma
+ * @version 11-22-2012
+ */
+@SuppressWarnings("serial")
+public class TetrisGui extends JFrame implements Observer
+{
+  /**
+   * The title of the game.
+   */
+  private static final String TITLE = "TCSS 305 Tetris Project";
+  
+  /**
+   * The default width of the game window.
+   */
+  private static final int DEFAULT_WIDTH = 500;
+  
+  /**
+   * The default height of the game window.
+   */
+  private static final int DEFAULT_HEIGHT = 550;
+  
+  /**
+   * The default width of the side columns.
+   */
+  private static final int SIDEC_WIDTH = 100;
+  
+  /**
+   * The games menu.
+   */
+  private final TetrisMenu my_menu;
+  
+  /**
+   * The Tetris panel where game play occurs.
+   */
+  private final TetrisPanel my_main_panel;
+  
+  /**
+   * The panel for holding Tetris Tetrominos.
+   */
+  private final TetrisHoldPanel my_hold_panel;
+  
+  /**
+   * The panel for holding the next Tetromino.
+   */
+  private final TetrisNextPanel my_next_panel;
+  
+  /**
+   * The panel for holding the next sequence of Tetrominos.
+   */
+  private final TetrisSequencePanel my_sequence_panel;
+  
+  /**
+   * The game score.
+   */
+  private int my_score;
+  
+  private JLabel my_score_label = new JLabel("" + 0);
+  
+  private final TetrisControls my_keys = new TetrisControls();
+  
+  /**
+   * Constructs a new instance of the Tetris game.
+   */
+  public TetrisGui()
+  {
+    super(TITLE);
+    final Board board = new Board();
+    board.addObserver(this);
+    my_menu = new TetrisMenu(my_keys);
+    my_hold_panel = new TetrisHoldPanel();
+    my_next_panel = new TetrisNextPanel();
+    my_sequence_panel = new TetrisSequencePanel();
+    my_main_panel = new TetrisPanel(board, my_keys);
+  }
+  
+  /**
+   * Starts the Tetris GUI.
+   */
+  public void start()
+  {
+    setSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT));
+    setBackground(Color.WHITE);
+    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    setJMenuBar(my_menu.getMenuBar());
+    setResizable(false);
+    add(topRow(), BorderLayout.NORTH);
+    add(leftColumn(), BorderLayout.WEST);
+    add(centerColumn(), BorderLayout.CENTER);
+    add(rightColumn(), BorderLayout.EAST);
+    pack();
+    setVisible(true);
+  }
+  
+  /**
+   * Top row of the frame holding the game mode.
+   * @return panel Panel holding top row contents.
+   */
+  private JPanel topRow()
+  {
+    final JPanel panel = new JPanel();
+    final JLabel mode = new JLabel("Marathon");
+    panel.add(mode);
+    return panel;
+  }
+  
+  /**
+   * The left column of the game.
+   * @return panel Panel holding contents in left column of the game.
+   */
+  private JPanel leftColumn()
+  {
+    final JPanel outer_panel = new JPanel(new BorderLayout());
+    outer_panel.setPreferredSize(new Dimension(SIDEC_WIDTH, getHeight()));
+    final JPanel inner_panel = new JPanel();
+    inner_panel.setLayout(new BoxLayout(inner_panel, BoxLayout.Y_AXIS));
+    outer_panel.add(inner_panel, BorderLayout.PAGE_START);
+    
+    final JLabel hold = new JLabel("Hold");
+    final JLabel score = new JLabel("Score: ");
+    final JLabel level = new JLabel("Level:\n1");
+    final JLabel line = new JLabel("Lines Needed:\n20");
+    
+    inner_panel.add(hold);
+    inner_panel.add(my_hold_panel);
+    inner_panel.add(score);
+    inner_panel.add(my_score_label);
+    inner_panel.add(level);
+    inner_panel.add(line);
+
+    return outer_panel;
+  }
+  
+  /**
+   * The center column of the game.
+   * @return panel Panel holding contents in center column of the game.
+   */
+  private JPanel centerColumn()
+  {
+    final JPanel panel = new JPanel();
+    panel.add(my_main_panel);
+    return panel;
+  }
+  
+  /**
+   * The right column of the game.
+   * @return panel Panel holding contents in right column of the game.
+   */
+  private JPanel rightColumn()
+  {
+    final JPanel outer_panel = new JPanel(new BorderLayout());
+    outer_panel.setPreferredSize(new Dimension(SIDEC_WIDTH, getHeight()));
+    final JPanel inner_panel = new JPanel();
+    inner_panel.setLayout(new BoxLayout(inner_panel, BoxLayout.Y_AXIS));
+    outer_panel.add(inner_panel, BorderLayout.PAGE_START);
+    
+    final JLabel next = new JLabel("Next");
+    final JLabel sequence = new JLabel("Sequence");
+    
+    inner_panel.add(next);
+    inner_panel.add(my_next_panel);
+    inner_panel.add(sequence);
+    inner_panel.add(my_sequence_panel);
+
+    return outer_panel;
+  }
+  
+  /**
+   * The update method for the Observer interface.
+   * 
+   * @param the_obj The observable that called us.
+   * @param the_arg The argument it passed us.
+   */
+  public void update(final Observable the_obj, final Object the_arg)
+  {
+    if (the_arg instanceof Tetromino)
+    {
+      my_hold_panel.setHold((Tetromino) the_arg);
+    }
+    else if (the_arg instanceof List<?>)
+    {
+      final List<Tetromino> tetromino_list = (List) the_arg;
+      my_next_panel.setNext(tetromino_list.get(0));
+      final Tetromino[] sequence = new Tetromino[4];
+      for (int i = 1; i < tetromino_list.size(); i++)
+      {
+        sequence[i - 1] = tetromino_list.get(i);
+      }
+      my_sequence_panel.setSequence(sequence);
+    }
+    else if (the_arg instanceof Integer)
+    {
+      my_score += (int) the_arg;
+      my_score_label.setText("" + my_score);
+    }
+    else if ((boolean) the_arg)
+    {
+      my_main_panel.repaint();
+    }
+  }
+}

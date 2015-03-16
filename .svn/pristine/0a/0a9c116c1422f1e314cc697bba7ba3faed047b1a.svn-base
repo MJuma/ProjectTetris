@@ -1,0 +1,195 @@
+/*
+ * Mohammad Juma
+ * 
+ * TCSS 305 - Autumn 2012
+ * Project Tetris
+ * October 26, 2012
+ */
+
+package tetris.pieces;
+
+import java.awt.Point;
+import java.util.Arrays;
+
+/**
+ * Parent class for all Tetrominos.
+ * @author Mohammad Juma
+ * @version 10-26-2012
+ */
+public class Tetromino implements ImmutablePiece
+{
+  /**
+   * Number of blocks in a tetromino.
+   */
+  private static final int NUMBER_OF_BLOCKS = 4;
+
+  /**
+   * All tetromino matrices are n x n matrices with equals rows and columns.
+   */
+  private final int my_rows_and_columns;
+
+  /**
+   * Matrix representation of the tetromino using 1's and 0's.
+   */
+  private final int[][] my_matrix;
+
+  /**
+   * The tetromino's current x position.
+   */
+  private final int my_x;
+
+  /**
+   * The tetromino's current y position.
+   */
+  private final int my_y;
+
+  /**
+   * Constructs a new tetromino.
+   * @param the_x The initial x position
+   * @param the_y The initial y position
+   * @param the_matrix Initial tetromino matrix representation
+   */
+  public Tetromino(final int the_x, final int the_y, final int[][] the_matrix)
+  {
+    my_x = the_x;
+    my_y = the_y;
+    my_rows_and_columns = the_matrix.length;
+    my_matrix = copyMatrix(the_matrix);
+  }
+
+  /**
+   * Copies a 2d matrix and its inner matrices.
+   * @param the_matrix The matrix to copy.
+   * @return return_matrix The new copied matrix.
+   */
+  private int[][] copyMatrix(final int[][] the_matrix)
+  {
+    final int[][] return_matrix = the_matrix.clone();
+    for (int i = 0; i < the_matrix.length; i++)
+    {
+      return_matrix[i] = the_matrix[i].clone();
+    }
+    return return_matrix;
+  }
+
+  /**
+   * Finds the block positions in a tetromino.
+   * @return block_points
+   */
+  public Point[] points()
+  {
+    final Point[] block_points = new Point[NUMBER_OF_BLOCKS];
+    int position = 0;
+    for (int r = 0; r < my_rows_and_columns; r++)
+    {
+      for (int c = 0; c < my_rows_and_columns; c++)
+      {
+        if (my_matrix[r][c] > 0)
+        {
+          block_points[position] = new Point(r, c);
+          position++;
+        }
+      }
+    }
+    return block_points;
+  }
+
+  /** 
+   * Moves this tetromino one space to the left. 
+   * @return An ImmutablePiece moved one space to the left.
+   */
+  public ImmutablePiece moveLeft()
+  {
+    return (ImmutablePiece) new Tetromino(my_x - 1, my_y, copyMatrix(my_matrix));
+  }
+
+  /** 
+   * Moves this tetromino one space to the right. 
+   * @return An ImmutablePiece moved one space to the right.
+   */
+  public ImmutablePiece moveRight()
+  {
+    return (ImmutablePiece) new Tetromino(my_x + 1, my_y, copyMatrix(my_matrix));
+  }
+
+  /** 
+   * Moves this tetromino one space down. 
+   * @return An ImmutablePiece moved one space down.
+   */
+  public ImmutablePiece moveDown()
+  {
+    return (ImmutablePiece) new Tetromino(my_x, my_y + 1, copyMatrix(my_matrix));
+  }
+
+  /** 
+   * Rotates this tetromino one quarter turn counter-clockwise.
+   * @return An ImmutablePiece rotated one quarter turn counter-clockwise
+   */
+  public ImmutablePiece rotate()
+  {
+    final int[][] rotated_matrix = new int[my_rows_and_columns][my_rows_and_columns];
+    int row = 0;
+    int col = my_rows_and_columns - 1;
+
+    for (int r = 0; r < my_rows_and_columns; r++)
+    {
+      for (int c = 0; c < my_rows_and_columns; c++)
+      {
+        rotated_matrix[r][c] = my_matrix[row++][col];
+      }
+      row = 0;
+      col--;
+    }
+    return (ImmutablePiece) new Tetromino(my_x, my_y, rotated_matrix);
+  }
+
+  /** 
+   * Rotates this tetromino one quarter turn clockwise.
+   * @return An ImmutablePiece rotated one quarter turn clockwise
+   */
+  public ImmutablePiece rotateCW()
+  {
+    final int[][] rotated_matrix = new int[my_rows_and_columns][my_rows_and_columns];
+
+    for (int m = 0; m < my_rows_and_columns; m++)
+    {
+      for (int n = 0; n < my_rows_and_columns; n++)
+      {
+        rotated_matrix[n][my_rows_and_columns - 1 - m] = my_matrix[m][n];
+      }
+    }
+    return (ImmutablePiece) new Tetromino(my_x, my_y, rotated_matrix);
+  }
+
+  /**
+   * @return the x coordinate of this tetromino.
+   */
+  public int x()
+  {
+    return my_x;
+  }
+
+  /**
+   * @return the y coordinate of this tetromino.
+   */
+  public int y()
+  {
+    return my_y;
+  }
+
+  /**
+   * Returns a string representation of the tetromino.
+   * @return sb.toString()
+   */
+  public String toString()
+  {
+    final StringBuilder sb = new StringBuilder();
+
+    for (int[] row: my_matrix)
+    {
+      sb.append(Arrays.toString(row));
+      sb.append('\n');
+    }
+    return sb.toString();
+  }
+}

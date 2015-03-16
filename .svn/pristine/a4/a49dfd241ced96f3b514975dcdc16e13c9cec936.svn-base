@@ -1,0 +1,122 @@
+/*
+ * Mohammad Juma
+ * 
+ * TCSS 305 - Autumn 2012
+ * Project Tetris
+ * November 22, 2012
+ */
+
+package tetris.gui;
+
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+
+import tetris.board.Board;
+
+/**
+ * The Key Adapter responsible for interacting with keyboard events.
+ * 
+ * @author Mohammad Juma
+ * @version 11-22-2012
+ */
+public class TetrisKeyBoardAdapter extends KeyAdapter
+{
+  /**
+   * The main frame holding the game.
+   */
+  private final TetrisGui my_frame;
+  
+  /**
+   * The panel responsible for drawing the game.
+   */
+  private final TetrisPanel my_game_panel;
+  
+  /**
+   * The current game board.
+   */
+  private final Board my_board;
+  
+  /**
+   * The game controls.
+   */
+  private final TetrisControls my_keys;
+  
+  /**
+   * Creates a new TetrisKeyboardAdapter and assigns the appropriate components.
+   * @param the_frame The main frame holding the game.
+   * @param the_game_panel The panel responsible for drawing the game.
+   * @param the_board The current game board.
+   * @param the_keys The controls of the game.
+   */
+  public TetrisKeyBoardAdapter(final TetrisGui the_frame, final TetrisPanel the_game_panel,
+                               final Board the_board,
+                               final TetrisControls the_keys)
+  {
+    super();
+    my_frame = the_frame;
+    my_game_panel = the_game_panel;
+    my_board = the_board;
+    my_keys = the_keys;
+  }
+  
+  /**
+   * Handles Keyboard pressing events.
+   * @param the_event The keyboard pressed event.
+   */
+  public void keyPressed(final KeyEvent the_event)
+  {      
+    if (my_game_panel.gameState() && !my_game_panel.hasEnded())
+    {
+      playGame(the_event.getKeyCode());
+    }
+    
+    switch (the_event.getKeyCode())
+    {
+      case KeyEvent.VK_P:
+        my_game_panel.gameToggle();        
+        break;
+      case KeyEvent.VK_ESCAPE:
+        my_frame.dispose();
+        break;
+      default:
+        break;
+    }
+  }
+  
+  /**
+   * Checks to see if game movement keys have been pressed.
+   * @param the_key_code The key code pressed.
+   */
+  public void playGame(final int the_key_code)
+  {
+    if (my_keys.keyExists(the_key_code))
+    {
+      switch (my_keys.getKey(the_key_code))
+      {
+        case Left:
+          my_board.moveLeft();
+          break;
+        case Right:
+          my_board.moveRight();
+          break;
+        case Down:
+          my_board.moveDown();
+          break;
+        case Rotate:
+          my_board.rotate();
+          break;
+        case RotateCW:
+          my_board.rotateCW();
+          break;
+        case Drop:
+          my_board.drop();
+          break;
+        case Hold:
+          my_board.hold();
+          break;
+        default:
+          break;
+      }
+    }
+  }
+}

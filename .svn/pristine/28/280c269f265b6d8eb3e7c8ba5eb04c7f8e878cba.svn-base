@@ -1,0 +1,103 @@
+/*
+ * Mohammad Juma
+ * 
+ * TCSS 305 - Autumn 2012
+ * Project Tetris
+ * October 26, 2012
+ */
+
+package tetris.pieces;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
+/**
+ * Tests the tetromino pieces in the tetris project.
+ * @author Mohammad Juma
+ * @version 10-26-2012
+ */
+public class TetrominosTest
+{
+  /**
+   * Number of rotations to return to initial position.
+   */
+  private static final int NUMBER_OF_ROTATIONS = 4;
+  
+  /**
+   * Array of all the tetromino's to test.
+   */
+  private static int[][][] my_tetrominos = new int[][][]
+  {Tetrominos.I.getTetromino(), Tetrominos.L.getTetromino(), Tetrominos.J.getTetromino(),
+    Tetrominos.S.getTetromino(), Tetrominos.Z.getTetromino(), Tetrominos.O.getTetromino(),
+    Tetrominos.T.getTetromino()};
+  
+  /**
+   * Current tetromino being tested.
+   */
+  private static Tetromino my_tetromino;
+  
+  /**
+   * Initializes the fields used in testing.
+   */
+  @Before
+  public void initializeTetromino()
+  {
+    my_tetromino = new Tetromino(5, 5, my_tetrominos[0]);
+  }
+  
+  /**
+   * Tests the initial locations of the tetromino.
+   */
+  @Test
+  public void origins()
+  {
+    fail();
+  }
+
+  /**
+   * Tests rotating a piece 4 times or 360 degrees.
+   */
+  @Test
+  public void rotate360()
+  {
+//    final int[][] positions_before_rotation = 
+//        new int[my_tetromino.blockPositions().length][my_tetromino.blockPositions()[0].length];
+//    System.arraycopy(my_tetromino.blockPositions(), 0, positions_before_rotation, 0,
+//                     my_tetromino.blockPositions().length);
+//    for (int i = 0; i < NUMBER_OF_ROTATIONS; i++)
+//    {
+//      my_tetromino.rotate();
+//    }
+//    assertArrayEquals("360 degree rotation is same as origin", positions_before_rotation,
+//                      my_tetromino.blockPositions());
+  }
+  
+  /**
+   * Tests moving a tetromino one position to the left.
+   */
+  @Test
+  public void moveLeft()
+  {
+    fail();
+  }
+  
+  /**
+   * Tests moving a tetromino one position to the right.
+   */
+  @Test
+  public void moveRight()
+  {
+    fail();
+  }
+  
+  /**
+   * Tests moving a tetromino one position down.
+   */
+  @Test
+  public void moveDown()
+  {
+    fail();
+  }
+}

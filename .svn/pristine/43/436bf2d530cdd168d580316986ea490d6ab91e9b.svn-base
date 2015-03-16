@@ -1,0 +1,354 @@
+/*
+ * Mohammad Juma
+ * 
+ * TCSS 305 - Autumn 2012
+ * Project Tetris
+ * November 22, 2012
+ */
+
+package tetris.gui;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.util.Observable;
+import java.util.Observer;
+
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JLayer;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.plaf.LayerUI;
+
+import tetris.board.Board;
+
+/**
+ * The Tetris Game GUI.
+ * 
+ * @author Mohammad Juma
+ * @version 11-22-2012
+ */
+@SuppressWarnings("serial")
+public class TetrisGui extends JFrame implements Observer
+{
+  /**
+   * The title of the game.
+   */
+  private static final String TITLE = "TCSS 305 Tetris Project";
+
+  /**
+   * The games background color.
+   */
+  private static final Color BACKGROUND_COLOR = new Color(100, 149, 237);
+
+  /**
+   * The default width of the side columns.
+   */
+  private static final int SIDEC_WIDTH = 100;
+
+  /**
+   * Sets the left and right border insets so
+   * the panels are not hugging the frame.
+   */
+  private static final int BORDER_INSET = 6;
+
+  /**
+   * The amount to multiple a block to get the width of the board.
+   */
+  private static final int BLOCK_WIDTH_MULTIPLIER = 10;
+
+  /**
+   * The number of lines needed to advance to the next level.
+   */
+  private static final int LINES_PER_LEVEL = 20;
+  
+  /**
+   * The number of sequence panels to create.
+   */
+  private static final int SEQUENCE_PANELS = 4;
+
+  /**
+   * The animation class for starting and stopping the game.
+   */
+  private final LayerUI<JPanel> my_animation;
+
+  /**
+   * The games menu.
+   */
+  private final TetrisMenu my_menu;
+
+  /**
+   * The controls for the game.
+   */
+  private final TetrisControls my_keys = new TetrisControls();
+  
+  /**
+   * KeyBoard adapter for controlling the game.
+   */
+  private final TetrisKeyBoardAdapter my_key_adapter;
+
+  /**
+   * The games current board.
+   */
+  private final Board my_board;
+
+  /**
+   * The Tetris panel where game play occurs.
+   */
+  private final TetrisPanel my_game_panel;
+  
+  /**
+   * The game actions for starting and stopping the game.
+   */
+  private final TetrisActions my_actions;
+
+  /**
+   * JLabel holding the current level.
+   */
+  private final JLabel my_level_label = new JLabel("1");
+
+  /**
+   * JLabel holding the number of remaining lines
+   * till the next level.
+   */
+  private final JLabel my_remaining_lines_label = new JLabel("20");
+
+  /**
+   * The current score.
+   */
+  private final JLabel my_score_label = new JLabel("0");
+  
+  /**
+   * The current level checked to see if a delay change is needed..
+   */
+  private int my_current_level = 1;
+
+  /**
+   * Constructs a new instance of the Tetris game.
+   */
+  public TetrisGui()
+  {
+    super(TITLE);
+    my_board = new Board();
+    my_board.addObserver(this);
+    my_menu = new TetrisMenu(this, my_keys);
+    my_game_panel = new TetrisPanel(my_board);
+    my_animation = new TetrisAnimation(my_game_panel);
+    my_key_adapter = new TetrisKeyBoardAdapter(this, my_game_panel, my_board, my_keys);
+    my_actions = new TetrisActions(this, my_board, my_game_panel, my_animation);
+  }
+
+  /**
+   * Starts the Tetris GUI.
+   */
+  public void start()
+  {
+    setSize(new Dimension(TetrisScreenResolution.Small.getWidth(),
+                          TetrisScreenResolution.Small.getHeight()));
+    setBackground(Color.WHITE);
+    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    setJMenuBar(my_menu.getMenuBar());
+    setResizable(false);
+    add(framePanel());
+    addKeyListener(my_key_adapter);
+    my_board.start();
+    setVisible(true);
+  }
+
+  /**
+   * Creates the main panel to be attached to the frame.
+   * @return panel
+   */
+  private JLayer<JPanel> framePanel()
+  {
+    final JPanel panel = new JPanel(new BorderLayout());
+    final JLayer<JPanel> animation_layer = new JLayer<JPanel>(panel, my_animation);
+    panel.setBorder(new EmptyBorder(0, BORDER_INSET, 0, BORDER_INSET));
+    panel.setBackground(BACKGROUND_COLOR);
+
+    panel.add(topRow(), BorderLayout.NORTH);
+    panel.add(leftColumn(), BorderLayout.WEST);
+    panel.add(centerColumn(), BorderLayout.CENTER);
+    panel.add(rightColumn(), BorderLayout.EAST);
+    return animation_layer;
+  }
+
+  /**
+   * Top row of the frame holding the game mode.
+   * @return panel Panel holding top row contents.
+   */
+  private JPanel topRow()
+  {
+    final JPanel panel = new JPanel();
+    panel.setBackground(BACKGROUND_COLOR);
+    final JLabel title_label = new JLabel();
+    title_label.setIcon(new ImageIcon("images/tetris_small.png"));
+    panel.add(title_label);
+    return panel;
+  }
+
+  /**
+   * The left column of the game.
+   * @return panel Panel holding contents in left column of the game.
+   */
+  private JPanel leftColumn()
+  {
+    final JPanel outer_panel = new JPanel(new BorderLayout());
+    outer_panel.setPreferredSize(new Dimension(SIDEC_WIDTH, getHeight()));
+    final JPanel inner_panel = new JPanel();
+    inner_panel.setLayout(new BoxLayout(inner_panel, BoxLayout.Y_AXIS));
+    outer_panel.add(inner_panel, BorderLayout.PAGE_START);
+
+    final TetrisSinglePanel hold_panel = new TetrisSinglePanel(my_board);
+    final JLabel hold_label = new JLabel();
+    hold_label.setIcon(new ImageIcon("images/hold_small.png"));
+    final JLabel score_label = new JLabel();
+    score_label.setIcon(new ImageIcon("images/score.png"));
+    my_score_label.setForeground(Color.RED);
+    my_score_label.setFont(new Font("Arial", Font.BOLD, 25));
+    final JLabel lines_label = new JLabel();
+    lines_label.setIcon(new ImageIcon("images/lines.png"));
+    final JLabel needed_label = new JLabel();
+    needed_label.setIcon(new ImageIcon("images/needed.png"));
+    my_remaining_lines_label.setForeground(Color.RED);
+    my_remaining_lines_label.setFont(new Font("Arial", Font.BOLD, 25));
+
+    outer_panel.setBackground(BACKGROUND_COLOR);
+    inner_panel.setBackground(BACKGROUND_COLOR);
+    inner_panel.add(hold_label);
+    inner_panel.add(hold_panel);
+    inner_panel.add(score_label);
+    inner_panel.add(my_score_label);
+    inner_panel.add(lines_label);
+    inner_panel.add(needed_label);
+    inner_panel.add(my_remaining_lines_label);
+
+    final JButton start_button = new JButton();
+    start_button.setAction(my_actions.getNewGame());
+    start_button.setFocusable(false);
+    inner_panel.add(start_button);
+    
+    final JButton toggle_button = new JButton();
+    toggle_button.setAction(my_actions.getToggleGame());
+    toggle_button.setFocusable(false);
+    inner_panel.add(toggle_button);
+    
+    final JButton end_button = new JButton();
+    end_button.setAction(my_actions.getEndGame());
+    end_button.setFocusable(false);
+    inner_panel.add(end_button);
+
+    return outer_panel;
+  }
+
+  /**
+   * The center column of the game.
+   * @return panel Panel holding contents in center column of the game.
+   */
+  private JPanel centerColumn()
+  {
+    final JPanel panel = new JPanel();
+    panel.setBackground(BACKGROUND_COLOR);
+    
+    final JPanel inner_panel = new JPanel(new FlowLayout());
+    inner_panel.setBackground(BACKGROUND_COLOR);
+    final JLabel level_label = new JLabel();
+    level_label.setIcon(new ImageIcon("images/level_small.png"));
+    inner_panel.add(level_label);
+    my_level_label.setForeground(Color.RED);
+    my_level_label.setFont(new Font("Arial", Font.BOLD, 25));
+    inner_panel.add(my_level_label);
+    
+    panel.add(inner_panel);
+    panel.add(my_game_panel);
+    return panel;
+  }
+
+  /**
+   * The right column of the game.
+   * @return panel Panel holding contents in right column of the game.
+   */
+  private JPanel rightColumn()
+  {
+    final JPanel outer_panel = new JPanel(new BorderLayout());
+    outer_panel.setPreferredSize(new Dimension(SIDEC_WIDTH, getHeight()));
+    final JPanel inner_panel = new JPanel();
+    inner_panel.setLayout(new BoxLayout(inner_panel, BoxLayout.Y_AXIS));
+    outer_panel.add(inner_panel, BorderLayout.PAGE_START);
+
+    final TetrisSinglePanel next_panel = new TetrisSinglePanel(my_board, 0);
+    final TetrisSinglePanel[] sequence_panels = new TetrisSinglePanel[SEQUENCE_PANELS];
+    final JLabel next_label = new JLabel();
+    next_label.setIcon(new ImageIcon("images/next_small.png"));
+    final JLabel sequence_label = new JLabel();
+    sequence_label.setIcon(new ImageIcon("images/sequence_small.png"));
+
+    outer_panel.setBackground(BACKGROUND_COLOR);
+    inner_panel.setBackground(BACKGROUND_COLOR);
+    inner_panel.add(next_label);
+    inner_panel.add(next_panel);
+    inner_panel.add(sequence_label);
+    for (int i = 0; i < sequence_panels.length; i++)
+    {
+      sequence_panels[i] = new TetrisSinglePanel(my_board, i + 1);
+      inner_panel.add(sequence_panels[i]);
+    }
+    return outer_panel;
+  }
+
+  /**
+   * The update method for the Observer interface.
+   * 
+   * @param the_obj The observable that called us.
+   * @param the_arg The argument it passed us.
+   */
+  public void update(final Observable the_obj, final Object the_arg)
+  { 
+    if (the_arg == TetrisObserverEvents.LinesCleared)
+    {
+      setScore();
+    }
+  }
+
+  /**
+   * Sets the screen size of the frame and the panels within it.
+   * @param the_name The name of the chosen screen resolution.
+   * @param the_width The width of the chosen screen resolution.
+   * @param the_height The height of the chosen screen resolution.
+   * @param the_block_size The block size.
+   */
+  public void screenSize(final String the_name, final int the_width,
+                         final int the_height, final int the_block_size)
+  {
+    setSize(new Dimension(the_width, the_height));
+    my_game_panel.setPreferredSize(new Dimension(the_block_size * BLOCK_WIDTH_MULTIPLIER,
+                                                 the_block_size * BLOCK_WIDTH_MULTIPLIER * 2));
+    my_game_panel.setBlockSize(the_block_size);
+    my_game_panel.repaint();
+  }
+
+  /**
+   * Handles setting the games score, level and lines remaining to advance.
+   */
+  private void setScore()
+  {
+    final int lines_needed = LINES_PER_LEVEL - (my_board.getLinesCleared() % LINES_PER_LEVEL);
+    final int level = (my_board.getLinesCleared() / LINES_PER_LEVEL) + 1;
+    final int score = (40 * my_board.getLinesCleared());
+    if (my_current_level != level)
+    {
+      my_game_panel.reduceDelay();
+    }
+    my_current_level = level;
+
+    my_level_label.setText(Integer.toString(level));
+    my_remaining_lines_label.setText(Integer.toString(lines_needed));
+    my_score_label.setText(Integer.toString(score));
+  }
+}

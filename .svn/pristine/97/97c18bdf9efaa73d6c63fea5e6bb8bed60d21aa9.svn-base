@@ -1,0 +1,271 @@
+/*
+ * Mohammad Juma
+ * 
+ * TCSS 305 - Autumn 2012
+ * Project Tetris
+ * November 22, 2012
+ */
+
+package tetris.gui;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.util.List;
+
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.Timer;
+
+import tetris.board.Board;
+/**
+ * The Tetris Game Panel for drawing the Tetrominos.
+ * 
+ * @author Mohammad Juma
+ * @version 11-22-2012
+ */
+@SuppressWarnings("serial")
+public class TetrisPanel extends JPanel
+{
+  /**
+   * The default width of the game panel.
+   */
+  private static final int DEFAULT_WIDTH = 250;
+  
+  /**
+   * The default height of the game panel.
+   */
+  private static final int DEFAULT_HEIGHT = 500;
+  
+  /**
+   * The size of each Tetromino block.
+   */
+  private static final int BLOCK_SIZE = 25;
+  
+  /**
+   * The default delay of the timer in milliseconds.
+   */
+  private static final int DEFAULT_DELAY = 1000;
+  
+  /**
+   * The key listener for the game panel.
+   */
+  private final KeyboardListener my_listener = new KeyboardListener();
+  
+  /**
+   * The tetris board.
+   */
+  private final Board my_board;
+  
+  /**
+   * The time in milliseconds to add on to the default delay.
+   */
+  private int my_delay_plus;
+  
+  /**
+   * The game timer.
+   */
+  private Timer my_timer;
+  
+  /**
+   * Flag to set the game state. True when playing and
+   * false when stopped or paused.
+   */
+  private boolean my_game_state;
+  
+  private final TetrisControls my_keys;
+  
+  /**
+   * Creates a new game panel for drawing the Tetrominos.
+   * @param the_board The game board.
+   */
+  public TetrisPanel(final Board the_board, final TetrisControls the_keys)
+  {
+    super();
+    setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT));
+    setBackground(Color.DARK_GRAY);
+    addKeyListener(my_listener);
+    setFocusable(true);
+    requestFocusInWindow();
+    my_timer = new Timer(DEFAULT_DELAY, new GameStepListener());
+    my_board = the_board;
+    my_keys = the_keys;
+  }
+
+  /**
+   * Paints the board and the Tetromino in play.
+   * 
+   * @param the_graphics The graphics context to use for painting.
+   */
+  public void paintComponent(final Graphics the_graphics)
+  {
+    super.paintComponent(the_graphics);
+    final Graphics2D g2d = (Graphics2D) the_graphics;
+    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, 
+                         RenderingHints.VALUE_ANTIALIAS_ON);
+    
+    final List<Color[]> board = my_board.getBoard();
+    
+    for (int m = 0; m < my_board.getHeight(); m++)
+    {
+      for (int n = 0; n < my_board.getWidth(); n++)
+      {
+        if (board.get(m)[n] == Color.DARK_GRAY)
+        {
+          g2d.setColor(Color.BLACK);
+          g2d.drawRect(n * BLOCK_SIZE, m * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+        }
+        else
+        {
+          g2d.setColor(Color.BLACK);
+          g2d.drawRect(n * BLOCK_SIZE, m * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+          g2d.setColor(board.get(m)[n]);
+          g2d.fill3DRect(n * BLOCK_SIZE, m * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE, true);
+          
+        }
+      }
+    }
+    
+    for (int m = 0; m < my_board.getTetromino().points().length; m++)
+    {
+      g2d.setColor(my_board.getTetromino().getColor());
+      g2d.fill3DRect(my_board.getTetromino().points()[m].x * BLOCK_SIZE,
+                   my_board.getTetromino().points()[m].y * BLOCK_SIZE,
+                   BLOCK_SIZE, BLOCK_SIZE, true);
+      //g2d.setColor(Color.BLACK);
+      //g2d.drawRect(my_board.getTetromino().points()[m].x * BLOCK_SIZE,
+        //           my_board.getTetromino().points()[m].y * BLOCK_SIZE,
+          //         BLOCK_SIZE, BLOCK_SIZE);
+    }
+  }
+  
+  /**
+   * Toggles the state of the game from running to not running.
+   */
+  public void gameToggle()
+  {
+    my_game_state ^= true;
+    if (my_game_state)
+    {
+      my_timer.start();
+    }
+    else
+    {
+      my_timer.stop();
+    }
+  }
+  
+  /**
+   * Changes the timer delay.
+   * @param the_delay_plus The delay in milliseconds to change the delay by.
+   */
+  public void delayPlus(final int the_delay_plus)
+  {
+    my_delay_plus += the_delay_plus;
+    my_timer = new Timer(DEFAULT_DELAY + my_delay_plus, new GameStepListener());
+  }
+  
+  
+  private void gameOverDialog()
+  {
+    JOptionPane.showMessageDialog(null, "Game Over");
+  }
+  
+  /**
+   * The Key Listener responsible for interacting with keyboard events.
+   * 
+   * @author Mohammad Juma
+   * @version 11-22-2012
+   */
+  private class KeyboardListener extends KeyAdapter // KeyAdapter
+  {
+    /**
+     * Handles Keyboard pressing events.
+     * @param the_event The keyboard pressed event.
+     */
+    public void keyPressed(final KeyEvent the_event)
+    {      
+      if (my_game_state)
+      {
+        playGame(the_event.getKeyCode());
+      }
+      
+      switch (the_event.getKeyCode())
+      {
+        case KeyEvent.VK_P:
+          gameToggle();
+          break;
+        case KeyEvent.VK_ESCAPE:
+          //dispose();
+          break;
+        default:
+          break;
+      }
+    }
+    
+    /**
+     * Checks to see if game movement keys have been pressed.
+     * @param the_key_code The key code pressed.
+     */
+    public void playGame(final int the_key_code)
+    {
+      switch (the_key_code)
+      {
+        case KeyEvent.VK_LEFT:
+          my_board.moveLeft();
+          break;
+        case KeyEvent.VK_RIGHT:
+          my_board.moveRight();
+          break;
+        case KeyEvent.VK_DOWN:
+          my_board.moveDown();
+          break;
+        case KeyEvent.VK_UP:
+          my_board.rotate();
+          break;
+        case KeyEvent.VK_SPACE:
+          my_board.drop();
+          break;
+        case KeyEvent.VK_SHIFT:
+          my_board.hold();
+          break;
+        default:
+          break;
+      }
+    }
+  }
+  
+  /**
+   * The Game Step Listener is responsible for stepping the game as the timer counts.
+   * 
+   * @author Mohammad Juma
+   * @version 11-22-2012
+   */
+  private class GameStepListener implements ActionListener
+  {
+    /**
+     * Handles game stepping.
+     * @param the_event The event that occurred.
+     */
+    public void actionPerformed(final ActionEvent the_event)
+    {
+      if (my_board.gameState())
+      {
+        my_board.step();
+        repaint();
+      }
+      else
+      {
+        my_timer.stop();
+        my_game_state = false;
+        gameOverDialog();
+      }
+    }
+  }
+}

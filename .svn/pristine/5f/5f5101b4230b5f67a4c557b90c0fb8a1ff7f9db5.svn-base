@@ -1,0 +1,407 @@
+/*
+ * Mohammad Juma
+ * 
+ * TCSS 305 - Autumn 2012
+ * Project Tetris
+ * October 26, 2012
+ */
+
+package tetris.pieces;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
+/**
+ * Tests the tetromino pieces in the tetris project.
+ * @author Mohammad Juma
+ * @version 10-26-2012
+ */
+public class TetrominosTest
+{ 
+  /**
+   * Rotated once string.
+   */
+  private static final String ROTATED_ONCE = "Rotated once.";
+  
+  /**
+   * Rotated twice string.
+   */
+  private static final String ROTATED_TWICE = "Rotated twice.";
+  
+  /**
+   * Rotated thrice string.
+   */
+  private static final String ROTATED_THRICE = "Rotated thrice.";
+  
+  /**
+   * Rotated once clockwise string.
+   */
+  private static final String ROTATED_ONCE_CLOCKWISE = "Rotated once clockwise.";
+  
+  /**
+   * Rotated twice clockwise string.
+   */
+  private static final String ROTATED_TWICE_CLOCKWISE = "Rotated twice clockwise.";
+  
+  /**
+   * Rotated thrice clockwise string.
+   */
+  private static final String ROTATED_THRICE_CLOCKWISE = "Rotated thrice clockwise.";
+
+  /**
+   * Array of 7 Tetrominos to test.
+   */
+  private Tetromino[] my_tetromino; 
+  
+  /**
+   * Initializes the fields used in testing.
+   */
+  @Before
+  public void initializeTetromino()
+  {
+    my_tetromino = new Tetromino[] {new Tetromino(5, 5, Tetrominos.I.getTetromino()),
+      new Tetromino(5, 5, Tetrominos.J.getTetromino()),
+      new Tetromino(5, 5, Tetrominos.L.getTetromino()),
+      new Tetromino(5, 5, Tetrominos.S.getTetromino()),
+      new Tetromino(5, 5, Tetrominos.Z.getTetromino()),
+      new Tetromino(5, 5, Tetrominos.O.getTetromino()),
+      new Tetromino(5, 5, Tetrominos.T.getTetromino())};
+  }
+  
+  /**
+   * Tests the initial locations of the tetromino.
+   * The two coordinates should not change.
+   */
+  @Test
+  public void origins()
+  {
+    for (int i = 0; i < my_tetromino.length; i++)
+    {
+      assertEquals("X value at origin.",
+                   5, my_tetromino[i].x());
+      assertEquals("Y value at origin.",
+                   5, my_tetromino[i].y());
+    }
+  }
+  
+  /**
+   * Tests rotating a piece 4 times as well as back and forth.
+   * The piece should end up in its original state and should look the same 
+   * as it did at initialization.
+   */
+  @Test
+  public void rotateToOrigin()
+  {
+    for (int i = 0; i < my_tetromino.length; i++)
+    {
+      Tetromino rotated_tetromino = my_tetromino[i];
+      for (int j = 0; j < 4; j++)
+      {
+        rotated_tetromino = (Tetromino) rotated_tetromino.rotate();
+      }
+      assertTrue("Rotating 4 times.", 
+                 my_tetromino[i].toString().equals(rotated_tetromino.toString()));
+      
+      rotated_tetromino = my_tetromino[i];
+      rotated_tetromino = (Tetromino) rotated_tetromino.rotate();
+      rotated_tetromino = (Tetromino) rotated_tetromino.rotateCW();
+      assertTrue("Rotating back and forth.", 
+                 my_tetromino[i].toString().equals(rotated_tetromino.toString()));
+    }
+  }
+  
+  /**
+   * Tests rotating the I Tetromino 1, 2 and 3 times.
+   * Also tests the clockwise rotation.
+   */
+  @Test
+  public void rotateITetromino()
+  {
+    final Tetromino rotated_once = new
+        Tetromino(5, 5, new int[][] {{0, 0, 0, 0}, {0, 0, 0, 0}, {1, 2, 3, 4}, {0, 0, 0, 0}});
+    final Tetromino rotated_twice = new
+        Tetromino(5, 5, new int[][] {{0, 0, 4, 0}, {0, 0, 3, 0}, {0, 0, 2, 0}, {0, 0, 1, 0}});
+    final Tetromino rotated_thrice = new
+        Tetromino(5, 5, new int[][] {{0, 0, 0, 0}, {4, 3, 2, 1}, {0, 0, 0, 0}, {0, 0, 0, 0}});
+    
+    Tetromino rotated_tetromino = (Tetromino) my_tetromino[0].rotate();
+    assertTrue(ROTATED_ONCE, 
+               rotated_once.toString().equals(rotated_tetromino.toString()));
+    rotated_tetromino = (Tetromino) rotated_tetromino.rotate();
+    assertTrue(ROTATED_TWICE, 
+               rotated_twice.toString().equals(rotated_tetromino.toString()));
+    rotated_tetromino = (Tetromino) rotated_tetromino.rotate();
+    assertTrue(ROTATED_THRICE, 
+               rotated_thrice.toString().equals(rotated_tetromino.toString()));
+    
+    rotated_tetromino = (Tetromino) my_tetromino[0].rotateCW();
+    assertTrue(ROTATED_ONCE_CLOCKWISE, 
+               rotated_thrice.toString().equals(rotated_tetromino.toString()));
+    rotated_tetromino = (Tetromino) rotated_tetromino.rotateCW();
+    assertTrue(ROTATED_TWICE_CLOCKWISE, 
+               rotated_twice.toString().equals(rotated_tetromino.toString()));
+    rotated_tetromino = (Tetromino) rotated_tetromino.rotateCW();
+    assertTrue(ROTATED_THRICE_CLOCKWISE, 
+               rotated_once.toString().equals(rotated_tetromino.toString()));
+  }
+  
+  /**
+   * Tests rotating the J Tetromino 1, 2 and 3 times.
+   * Also tests the clockwise rotation.
+   */
+  @Test
+  public void rotateJTetromino()
+  {
+    final Tetromino rotated_once = new
+        Tetromino(5, 5, new int[][] {{0, 0, 0}, {1, 2, 3}, {0, 0, 4}});
+    final Tetromino rotated_twice = new
+        Tetromino(5, 5, new int[][] {{0, 3, 4}, {0, 2, 0}, {0, 1, 0}});
+    final Tetromino rotated_thrice = new
+        Tetromino(5, 5, new int[][] {{4, 0, 0}, {3, 2, 1}, {0, 0, 0}});
+    
+    Tetromino rotated_tetromino = (Tetromino) my_tetromino[1].rotate();
+    assertTrue(ROTATED_ONCE, 
+               rotated_once.toString().equals(rotated_tetromino.toString()));
+    rotated_tetromino = (Tetromino) rotated_tetromino.rotate();
+    assertTrue(ROTATED_TWICE, 
+               rotated_twice.toString().equals(rotated_tetromino.toString()));
+    rotated_tetromino = (Tetromino) rotated_tetromino.rotate();
+    assertTrue(ROTATED_THRICE, 
+               rotated_thrice.toString().equals(rotated_tetromino.toString()));
+    
+    rotated_tetromino = (Tetromino) my_tetromino[1].rotateCW();
+    assertTrue(ROTATED_ONCE_CLOCKWISE, 
+               rotated_thrice.toString().equals(rotated_tetromino.toString()));
+    rotated_tetromino = (Tetromino) rotated_tetromino.rotateCW();
+    assertTrue(ROTATED_TWICE_CLOCKWISE, 
+               rotated_twice.toString().equals(rotated_tetromino.toString()));
+    rotated_tetromino = (Tetromino) rotated_tetromino.rotateCW();
+    assertTrue(ROTATED_THRICE_CLOCKWISE, 
+               rotated_once.toString().equals(rotated_tetromino.toString()));
+  }
+  
+  /**
+   * Tests rotating the J Tetromino 1, 2 and 3 times.
+   * Also tests the clockwise rotation.
+   */
+  @Test
+  public void rotateLTetromino()
+  {
+    final Tetromino rotated_once = new
+        Tetromino(5, 5, new int[][] {{0, 0, 4}, {1, 2, 3}, {0, 0, 0}});
+    final Tetromino rotated_twice = new
+        Tetromino(5, 5, new int[][] {{4, 3, 0}, {0, 2, 0}, {0, 1, 0}});
+    final Tetromino rotated_thrice = new
+        Tetromino(5, 5, new int[][] {{0, 0, 0}, {3, 2, 1}, {4, 0, 0}});
+    
+    Tetromino rotated_tetromino = (Tetromino) my_tetromino[2].rotate();
+    assertTrue(ROTATED_ONCE, 
+               rotated_once.toString().equals(rotated_tetromino.toString()));
+    rotated_tetromino = (Tetromino) rotated_tetromino.rotate();
+    assertTrue(ROTATED_TWICE, 
+               rotated_twice.toString().equals(rotated_tetromino.toString()));
+    rotated_tetromino = (Tetromino) rotated_tetromino.rotate();
+    assertTrue(ROTATED_THRICE, 
+               rotated_thrice.toString().equals(rotated_tetromino.toString()));
+    
+    rotated_tetromino = (Tetromino) my_tetromino[2].rotateCW();
+    assertTrue(ROTATED_ONCE_CLOCKWISE, 
+               rotated_thrice.toString().equals(rotated_tetromino.toString()));
+    rotated_tetromino = (Tetromino) rotated_tetromino.rotateCW();
+    assertTrue(ROTATED_TWICE_CLOCKWISE, 
+               rotated_twice.toString().equals(rotated_tetromino.toString()));
+    rotated_tetromino = (Tetromino) rotated_tetromino.rotateCW();
+    assertTrue(ROTATED_THRICE_CLOCKWISE, 
+               rotated_once.toString().equals(rotated_tetromino.toString()));
+  }
+  
+  /**
+   * Tests rotating the J Tetromino 1, 2 and 3 times.
+   * Also tests the clockwise rotation.
+   */
+  @Test
+  public void rotateSTetromino()
+  {
+    final Tetromino rotated_once = new
+        Tetromino(5, 5, new int[][] {{1, 0, 0}, {2, 3, 0}, {0, 4, 0}});
+    final Tetromino rotated_twice = new
+        Tetromino(5, 5, new int[][] {{0, 0, 0}, {0, 3, 4}, {1, 2, 0}});
+    final Tetromino rotated_thrice = new
+        Tetromino(5, 5, new int[][] {{0, 4, 0}, {0, 3, 2}, {0, 0, 1}});
+    
+    Tetromino rotated_tetromino = (Tetromino) my_tetromino[3].rotate();
+    assertTrue(ROTATED_ONCE, 
+               rotated_once.toString().equals(rotated_tetromino.toString()));
+    rotated_tetromino = (Tetromino) rotated_tetromino.rotate();
+    assertTrue(ROTATED_TWICE, 
+               rotated_twice.toString().equals(rotated_tetromino.toString()));
+    rotated_tetromino = (Tetromino) rotated_tetromino.rotate();
+    assertTrue(ROTATED_THRICE, 
+               rotated_thrice.toString().equals(rotated_tetromino.toString()));
+    
+    rotated_tetromino = (Tetromino) my_tetromino[3].rotateCW();
+    assertTrue(ROTATED_ONCE_CLOCKWISE, 
+               rotated_thrice.toString().equals(rotated_tetromino.toString()));
+    rotated_tetromino = (Tetromino) rotated_tetromino.rotateCW();
+    assertTrue(ROTATED_TWICE_CLOCKWISE, 
+               rotated_twice.toString().equals(rotated_tetromino.toString()));
+    rotated_tetromino = (Tetromino) rotated_tetromino.rotateCW();
+    assertTrue(ROTATED_THRICE_CLOCKWISE, 
+               rotated_once.toString().equals(rotated_tetromino.toString()));
+  }
+  
+  /**
+   * Tests rotating the J Tetromino 1, 2 and 3 times.
+   * Also tests the clockwise rotation.
+   */
+  @Test
+  public void rotateZTetromino()
+  {
+    final Tetromino rotated_once = new
+        Tetromino(5, 5, new int[][] {{0, 4, 0}, {2, 3, 0}, {1, 0, 0}});
+    final Tetromino rotated_twice = new
+        Tetromino(5, 5, new int[][] {{0, 0, 0}, {4, 3, 0}, {0, 2, 1}});
+    final Tetromino rotated_thrice = new
+        Tetromino(5, 5, new int[][] {{0, 0, 1}, {0, 3, 2}, {0, 4, 0}});
+    
+    Tetromino rotated_tetromino = (Tetromino) my_tetromino[4].rotate();
+    assertTrue(ROTATED_ONCE, 
+               rotated_once.toString().equals(rotated_tetromino.toString()));
+    rotated_tetromino = (Tetromino) rotated_tetromino.rotate();
+    assertTrue(ROTATED_TWICE, 
+               rotated_twice.toString().equals(rotated_tetromino.toString()));
+    rotated_tetromino = (Tetromino) rotated_tetromino.rotate();
+    assertTrue(ROTATED_THRICE, 
+               rotated_thrice.toString().equals(rotated_tetromino.toString()));
+    
+    rotated_tetromino = (Tetromino) my_tetromino[4].rotateCW();
+    assertTrue(ROTATED_ONCE_CLOCKWISE, 
+               rotated_thrice.toString().equals(rotated_tetromino.toString()));
+    rotated_tetromino = (Tetromino) rotated_tetromino.rotateCW();
+    assertTrue(ROTATED_TWICE_CLOCKWISE, 
+               rotated_twice.toString().equals(rotated_tetromino.toString()));
+    rotated_tetromino = (Tetromino) rotated_tetromino.rotateCW();
+    assertTrue(ROTATED_THRICE_CLOCKWISE, 
+               rotated_once.toString().equals(rotated_tetromino.toString()));
+  }
+  
+  /**
+   * Tests rotating the J Tetromino 1, 2 and 3 times.
+   * Also tests the clockwise rotation.
+   */
+  @Test
+  public void rotateOTetromino()
+  {
+    final Tetromino rotated_once = new
+        Tetromino(5, 5, new int[][] {{2, 4}, {1, 3}});
+    final Tetromino rotated_twice = new
+        Tetromino(5, 5, new int[][] {{4, 3}, {2, 1}});
+    final Tetromino rotated_thrice = new
+        Tetromino(5, 5, new int[][] {{3, 1}, {4, 2}});
+    
+    Tetromino rotated_tetromino = (Tetromino) my_tetromino[5].rotate();
+    assertTrue(ROTATED_ONCE, 
+               rotated_once.toString().equals(rotated_tetromino.toString()));
+    rotated_tetromino = (Tetromino) rotated_tetromino.rotate();
+    assertTrue(ROTATED_TWICE, 
+               rotated_twice.toString().equals(rotated_tetromino.toString()));
+    rotated_tetromino = (Tetromino) rotated_tetromino.rotate();
+    assertTrue(ROTATED_THRICE, 
+               rotated_thrice.toString().equals(rotated_tetromino.toString()));
+    
+    rotated_tetromino = (Tetromino) my_tetromino[5].rotateCW();
+    assertTrue(ROTATED_ONCE_CLOCKWISE, 
+               rotated_thrice.toString().equals(rotated_tetromino.toString()));
+    rotated_tetromino = (Tetromino) rotated_tetromino.rotateCW();
+    assertTrue(ROTATED_TWICE_CLOCKWISE, 
+               rotated_twice.toString().equals(rotated_tetromino.toString()));
+    rotated_tetromino = (Tetromino) rotated_tetromino.rotateCW();
+    assertTrue(ROTATED_THRICE_CLOCKWISE, 
+               rotated_once.toString().equals(rotated_tetromino.toString()));
+  }
+  
+  /**
+   * Tests rotating the J Tetromino 1, 2 and 3 times.
+   * Also tests the clockwise rotation.
+   */
+  @Test
+  public void rotateTTetromino()
+  {
+    final Tetromino rotated_once = new
+        Tetromino(5, 5, new int[][] {{0, 0, 4}, {0, 1, 3}, {0, 0, 2}});
+    final Tetromino rotated_twice = new
+        Tetromino(5, 5, new int[][] {{4, 3, 2}, {0, 1, 0}, {0, 0, 0}});
+    final Tetromino rotated_thrice = new
+        Tetromino(5, 5, new int[][] {{2, 0, 0}, {3, 1, 0}, {4, 0, 0}});
+    
+    Tetromino rotated_tetromino = (Tetromino) my_tetromino[6].rotate();
+    assertTrue(ROTATED_ONCE, 
+               rotated_once.toString().equals(rotated_tetromino.toString()));
+    rotated_tetromino = (Tetromino) rotated_tetromino.rotate();
+    assertTrue(ROTATED_TWICE, 
+               rotated_twice.toString().equals(rotated_tetromino.toString()));
+    rotated_tetromino = (Tetromino) rotated_tetromino.rotate();
+    assertTrue(ROTATED_THRICE, 
+               rotated_thrice.toString().equals(rotated_tetromino.toString()));
+    
+    rotated_tetromino = (Tetromino) my_tetromino[6].rotateCW();
+    assertTrue(ROTATED_ONCE_CLOCKWISE, 
+               rotated_thrice.toString().equals(rotated_tetromino.toString()));
+    rotated_tetromino = (Tetromino) rotated_tetromino.rotateCW();
+    assertTrue(ROTATED_TWICE_CLOCKWISE, 
+               rotated_twice.toString().equals(rotated_tetromino.toString()));
+    rotated_tetromino = (Tetromino) rotated_tetromino.rotateCW();
+    assertTrue(ROTATED_THRICE_CLOCKWISE, 
+               rotated_once.toString().equals(rotated_tetromino.toString()));
+  }
+  
+  /**
+   * Tests moving a tetromino one position to the left.
+   * Only the X coordinate should decrease by 1.
+   */
+  @Test
+  public void moveLeft()
+  {
+    for (int i = 0; i < my_tetromino.length; i++)
+    {
+      assertEquals("X value from moving the tetromino one space left.",
+                   4, my_tetromino[i].moveLeft().x());
+      assertEquals("Y value from moving the tetromino one space left.",
+                   5, my_tetromino[i].moveLeft().y());
+    }
+  }
+  
+  /**
+   * Tests moving a tetromino one position to the right.
+   * Only the X coordinate should increase by 1.
+   */
+  @Test
+  public void moveRight()
+  {
+    for (int i = 0; i < my_tetromino.length; i++)
+    {
+      assertEquals("X value from moving the tetromino one space right.",
+                   6, my_tetromino[i].moveRight().x());
+      assertEquals("Y value from moving the tetromino one space right.",
+                   5, my_tetromino[i].moveRight().y());
+    }
+  }
+  
+  /**
+   * Tests moving a tetromino one position down.
+   * Only the Y coordinate should increase by 1.
+   */
+  @Test
+  public void moveDown()
+  {
+    for (int i = 0; i < my_tetromino.length; i++)
+    {
+      assertEquals("X value from moving the tetromino one space down.",
+                   5, my_tetromino[i].moveDown().x());
+      assertEquals("Y value from moving the tetromino one space down.",
+                   6, my_tetromino[i].moveDown().y());
+    }
+  }
+}

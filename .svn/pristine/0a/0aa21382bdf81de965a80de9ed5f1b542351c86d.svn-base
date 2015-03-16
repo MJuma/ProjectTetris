@@ -1,0 +1,160 @@
+/*
+ * Mohammad Juma
+ * 
+ * TCSS 305 - Autumn 2012
+ * Project Tetris
+ * November 22, 2012
+ */
+
+package tetris.gui;
+
+import java.awt.event.KeyEvent;
+
+/**
+ * Holds the controls for the game.
+ * 
+ * @author Mohammad Juma
+ * @version 11-22-2012
+ */
+public class TetrisControls
+{
+  /**
+   * The names of the game controls.
+   */
+  private static final String[] CONTROL_NAMES = new String[] {"Left", "Right", "Down", "Drop",
+    "Rotate", "Rotate CW", "Hold"};
+  
+  /**
+   * Array holding the key codes for the game controls.
+   * All seven controls in order from 0-6 are:
+   * 0-MoveLeft / 1-MoveRight / 2-MoveDown / 3-Drop
+   * 4-Rotate / 5-RotateCW / 6-Hold
+   */
+  private int[] my_game_controls = new int[] {KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT,
+    KeyEvent.VK_DOWN, KeyEvent.VK_SPACE, KeyEvent.VK_UP, 0, KeyEvent.VK_SHIFT};
+  
+  /**
+   * Key for toggling the game state between
+   * play and pause.
+   */
+  private int my_toggle_state = KeyEvent.VK_P;
+  
+  /**
+   * Key for ending the current game.
+   */
+  private int my_end_game;
+
+  /**
+   * Returns the names of the game controls.
+   * @return CONTROL_NAMES
+   */
+  public String[] getControlNames()
+  {
+    return CONTROL_NAMES.clone();
+  }
+  
+  /**
+   * Returns the games controls.
+   * @return my_game_controls
+   */
+  public int[] getControls()
+  {
+    return my_game_controls.clone();
+  }
+  
+  /**
+   * Changes the key for one of the games controls.
+   * @param the_controls
+   */
+  public void setControls(final int the_control, final int the_key)
+  {
+    my_game_controls[the_control] = the_key;
+  }
+
+  /**
+   * Returns the key for moving the Tetromino
+   * one position to the left.
+   * @return my_left
+   */
+  public int left()
+  {
+    return my_game_controls[0];
+  }
+
+  /**
+   * Returns the key for moving the Tetromino
+   * one position to the right.
+   * @return my_right
+   */
+  public int right()
+  {
+    return my_game_controls[1];
+  }
+
+  /**
+   * Returns the key for moving the Tetromino
+   * one position down.
+   * @return my_right
+   */
+  public int down()
+  {
+    return my_game_controls[2];
+  }
+
+  /**
+   * Returns the key for rotating the Tetromino.
+   * @return my_rotate
+   */
+  public int rotate()
+  {
+    return my_game_controls[3];
+  }
+
+  /**
+   * Returns the key for rotating the Tetromino
+   * clockwise.
+   * @return my_rotate_cw
+   */
+  public int rotateCW()
+  {
+    return my_game_controls[4];
+  }
+
+  /**
+   * Returns the key for dropping the Tetromino.
+   * @return my_drop
+   */
+  public int drop()
+  {
+    return my_game_controls[5];
+  }
+ 
+  /**
+   * Returns the key for holding the
+   * current Tetromino.
+   * @return my_hold
+   */
+  public int hold()
+  {
+    return my_game_controls[6];
+  }
+
+  /**
+   * Returns the key for toggling the game
+   * state between play and pause.
+   * @return my_toggle_state
+   */
+  public int toggleState()
+  {
+    return my_toggle_state;
+  }
+ 
+  /**
+   * Returns the key for ending the game.
+   * @return the my_end_game
+   */
+  public int endGame()
+  {
+    return my_end_game;
+  }
+}

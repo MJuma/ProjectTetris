@@ -1,0 +1,349 @@
+/*
+ * Mohammad Juma
+ * 
+ * TCSS 305 - Autumn 2012
+ * Project Tetris
+ * November 11, 2012
+ */
+
+package tetris.baord;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Observable;
+
+import tetris.pieces.Tetromino;
+import tetris.pieces.Tetrominos;
+import tetris.utilities.Copy;
+
+/**
+ * The Tetris Board Class.
+ * 
+ * @author Mohammad Juma
+ * @version 11-11-2012
+ */
+public class Board extends Observable
+{
+  /**
+   * The default width of the Tetris board.
+   */
+  private static final int DEFAULT_WIDTH = 10;
+  
+  /**
+   * The default height of the tetris board.
+   */
+  private static final int DEFAULT_HEIGHT = 20;
+  
+  /**
+   * Y coordinate above the board the Tetromino starts at.
+   */
+  private static final int Y_START = -4;
+  
+  /**
+   * X coordinate the Tetromino starts at.
+   */
+  private final int my_x_start;
+  
+  /**
+   * Copies 2D arrays.
+   */
+  private final Copy my_copy = new Copy();
+  
+  /**
+   * The width of the Tetris board. Default is 10.
+   */
+  private final int my_width;
+  
+  /**
+   * The height of the Tetris board. Default is 20
+   */
+  private final int my_height;
+  
+  /**
+   * Flag for determining Tetromino generation randomness.
+   */
+  private boolean my_random;
+  
+  /**
+   * A List for holding the pre generated Tetrominos.
+   */
+  private final List<Tetromino> my_generated_tetrominos = new ArrayList<Tetromino>();
+  
+  /**
+   * The Tetromino currently being used from the pre generated List.
+   */
+  private int my_current_element;
+  
+  /**
+   * An array of arrays representing the Tetris board.
+   */
+  private List<int[]> my_board;
+  
+  /**
+   * The current Tetromino in play.
+   */
+  private Tetromino my_tetromino;
+  
+  /**
+   * Creates a new board with defaults.
+   */
+  public Board()
+  {
+    super();
+    my_width = DEFAULT_WIDTH;
+    my_height = DEFAULT_HEIGHT;
+    my_x_start = (int) (Math.floor(my_width) / 2) - 2;
+    my_board = new ArrayList<int[]>();
+    createBoard();
+    my_random = true;
+    my_tetromino = newTetromino();
+  }
+  
+  /**
+   * Creates a new board with custom size.
+   * @param the_width The width in blocks of the new board.
+   * @param the_height The height in blocks of the new board.
+   */
+  public Board(final int the_width, final int the_height)
+  {
+    super();
+    my_width = the_width;
+    my_height = the_height;
+    my_x_start = (int) (Math.floor(my_width) / 2) - 2;
+    my_board = new ArrayList<int[]>();
+    createBoard();
+    my_random = true;
+    my_tetromino = newTetromino();
+  }
+  
+  /**
+   * Creates a new Board.
+   */
+  private void createBoard()
+  {
+    for (int r = 0; r < my_height; r++)
+    {
+      my_board.add(new int[my_width]);
+    }
+    setChanged();
+    notifyObservers();
+  }
+  
+  /**
+   * Generates a new Tetromino, either randomly or specifically.
+   * @return new_tetromino The newly generated Tetromino.
+   */
+  private Tetromino newTetromino()
+  {
+    Tetromino new_tetromino = 
+        new Tetromino(my_x_start, Y_START, Tetrominos.random().getTetromino());
+    if (!my_random)
+    {
+      new_tetromino = my_generated_tetrominos.get(my_current_element);
+      my_current_element++;
+    }
+    return new_tetromino;
+  }
+  
+  /**
+   * Updates the board by one step.
+   * @return Whether the Board can update the piece or has to freeze.
+   */
+  public boolean step()
+  {
+    boolean stepped = true;
+    if (!moveDown())
+    {
+      my_board = freezeTetromino();
+      checkBoard();
+      my_tetromino = newTetromino();
+      stepped = false;
+      setChanged();
+      notifyObservers();
+    }
+    return stepped;
+  }
+  
+  /**
+   * Attempts to move the Tetromino left by checking for collisions first.
+   * @return Whether the Tetromino can be moved or not.
+   */
+  public boolean moveLeft()
+  {
+    boolean movable = false;
+    final Tetromino moved_left = (Tetromino) my_tetromino.moveLeft();
+    if (!collide(moved_left))
+    {
+      my_tetromino = moved_left;
+      movable = true;
+      setChanged();
+      notifyObservers();
+    }
+    return movable;
+  }
+  
+  /**
+   * Attempts to move the Tetromino right by checking for collisions first.
+   * @return Whether the Tetromino can be moved or not.
+   */
+  public boolean moveRight()
+  {
+    boolean movable = false;
+    final Tetromino moved_right = (Tetromino) my_tetromino.moveRight();
+    if (!collide(moved_right))
+    {
+      my_tetromino = moved_right;
+      movable = true;
+      setChanged();
+      notifyObservers();
+    }
+    return movable;
+  }
+  
+  /**
+   * Attempts to move the Tetromino down by checking for collisions first.
+   * @return Whether the Tetromino can be moved or not.
+   */
+  public boolean moveDown()
+  {
+    boolean movable = false;
+    final Tetromino moved_down = (Tetromino) my_tetromino.moveDown();
+    if (!collide(moved_down))
+    {
+      my_tetromino = moved_down;
+      movable = true;
+      setChanged();
+      notifyObservers();
+    }
+    return movable;
+  }
+  
+  /**
+   * Attempts to rotate the Tetromino by checking for collisions first.
+   * @return Whether the Tetromino can be rotated or not.
+   */
+  public boolean rotate()
+  {
+    boolean rotatable = false;
+    final Tetromino rotated = (Tetromino) my_tetromino.rotate();
+    if (!collide(rotated))
+    {
+      my_tetromino = rotated;
+      rotatable = true;
+      setChanged();
+      notifyObservers();
+    }
+    return rotatable;
+  }
+  
+  /**
+   * Checks the Tetromino passed into it to see if its block coordinates 
+   * collide with frozen blocks or the boards edges.
+   * @param the_tetromino The changed Tetromino to test.
+   * @return Whether or not the Tetromino can be moved.
+   */
+  private boolean collide(final Tetromino the_tetromino)
+  {
+    boolean collided = false;
+    
+    for (int i = 0; i < the_tetromino.points().length; i++)
+    {
+      final int x = the_tetromino.points()[i].x;
+      final int y = the_tetromino.points()[i].y;
+      
+      if (y < 0)
+      {
+        // If the y coordinate is less than 0, skip collision checking on it.
+        continue;
+      }
+      if (y >= my_height || x < 0 || x >= my_width || my_board.get(y)[x] == 1)
+      {
+        collided = true;
+        break;
+      }
+    }
+    return collided;
+  }
+  
+  /**
+   * Adds the Tetromino blocks to the Tetris board.
+   * @return Returns a new List with the Tetromino frozen on the board.
+   */
+  private List<int[]> freezeTetromino()
+  {
+    final List<int[]> new_board = my_copy.copyBoard(my_board);
+    
+    for (int i = 0; i < my_tetromino.points().length; i++)
+    {
+      if (my_tetromino.points()[i].y >= 0)
+      {
+        final int[] row = new_board.get(my_tetromino.points()[i].y);
+        row[my_tetromino.points()[i].x] = 1;
+        new_board.set(my_tetromino.points()[i].y, row);
+      }
+    }
+    return new_board;
+  }
+  
+  /**
+   * Check the board to see if any rows are filled.
+   */
+  private void checkBoard()
+  {
+    int[] current_row;
+    
+    for (int r = 0; r < my_height; r++)
+    {
+      current_row = my_board.get(r);
+      boolean row_filled = true;
+      for (int n: current_row)
+      {
+        if (current_row[n] == 0)
+        {
+          row_filled = false;
+        }
+      }
+      if (row_filled)
+      {
+        my_board.remove(r);
+        my_board.add(0, new int[my_width]);
+      }
+    }
+  }
+  
+  /**
+   * Sets the randomness of Tetromino generation.
+   * @param the_random True for random piece generation.
+   * @param the_number_generated The number of Tetrominos to generate.
+   */
+  public void setRandom(final boolean the_random, final int the_number_generated)
+  {
+    my_random = the_random;
+    
+    if (!my_random)
+    {
+      for (int i = 0; i < the_number_generated; i++)
+      {
+        my_generated_tetrominos.add(newTetromino());
+      }
+    }
+  }
+  
+  /**
+   * Returns a string representation of the board.
+   * @return sb.toString()
+   */
+  public String toString()
+  {
+    final List<int[]> string_board = freezeTetromino();
+    final StringBuilder sb = new StringBuilder();
+
+    for (int[] row: string_board)
+    {
+      sb.append(Arrays.toString(row));
+      sb.append('\n');
+    }
+    return sb.toString();
+  }
+}

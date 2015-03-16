@@ -1,0 +1,53 @@
+/*
+ * Mohammad Juma
+ * 
+ * TCSS 305 - Autumn 2012
+ * Project Tetris
+ * November 11, 2012
+ */
+
+package tetris.utilities;
+
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Utility class for deep copying different data structures.
+ * 
+ * @author Mohammad Juma
+ * @version 11-11-2012
+ */
+public class Copy
+{
+  /**
+   * Copies a 2d array and its inner arrays.
+   * @param the_array The array to copy.
+   * @return return_array The new copied array.
+   */
+  public int[][] copyArray(final int[][] the_array)
+  {
+    final int[][] return_array = the_array.clone();
+    for (int i = 0; i < the_array.length; i++)
+    {
+      return_array[i] = the_array[i].clone();
+    }
+    return return_array;
+  }
+
+  /**
+   * Copies a List of integer arrays.
+   * @param the_list The List to copy.
+   * @return new_list The new List of integer arrays.
+   */
+  public List<Color[]> copyList(final List<Color[]> the_list)
+  {
+    final List<Color[]> new_list = new ArrayList<Color[]>();
+
+    for (int i = 0; i < the_list.size(); i++)
+    {
+      new_list.add(the_list.get(i).clone());
+    }
+    return new_list;
+  }
+}

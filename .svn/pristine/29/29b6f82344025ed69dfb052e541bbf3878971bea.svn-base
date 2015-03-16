@@ -1,0 +1,64 @@
+package tetris.pieces;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * Main class for testing tetromino behavior.
+ * @author Mohammad Juma
+ * @version 1
+ */
+public final class TestClass
+{
+  /**
+   * Number of rotations to return to initial position.
+   */
+  private static final int NUMBER_OF_ROTATIONS = 4;
+  
+  /**
+   * Array of all the tetrominos to test.
+   */
+  private static int[][][] my_tetrominos = new int[][][]
+  {Tetrominos.I.getTetromino(), Tetrominos.L.getTetromino(), Tetrominos.J.getTetromino(),
+    Tetrominos.S.getTetromino(), Tetrominos.Z.getTetromino(), Tetrominos.O.getTetromino(),
+    Tetrominos.T.getTetromino()};
+  
+  /**
+   * TODO .
+   */
+  private static Tetromino my_tetromino;
+
+  /**
+   * Main class for testing tetromino behavior.
+   * @param the_args Ignored
+   */
+  public static void main(final String... the_args)
+  {
+    for (int i = 0; i < my_tetrominos.length; i++)
+    {
+      my_tetromino = new Tetromino(1, 1, my_tetrominos[i]);
+      
+      System.out.println("***" + my_tetromino.getClass().getName() +
+                         "***\nInitial State:");
+      System.out.print(my_tetromino.toString());
+      System.out.print("Initial Positions:");
+      for (int[] row: my_tetromino.blockPositions())
+      {
+        System.out.print(Arrays.toString(row));
+      }
+      for (int j = 0; j < NUMBER_OF_ROTATIONS; j++)
+      {
+        my_tetromino.rotate();
+        System.out.println("\nRotated " + (j + 1) + " time(s):");
+        System.out.print(my_tetromino.toString());
+        System.out.print("Positions after " + (j + 1) + " rotation(s):");
+        for (int[] row: my_tetromino.blockPositions())
+        {
+          System.out.print(Arrays.toString(row));
+        }
+      }
+      System.out.println('\n');
+    }
+  }
+}

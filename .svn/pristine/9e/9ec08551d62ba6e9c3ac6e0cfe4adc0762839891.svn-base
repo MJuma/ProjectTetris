@@ -1,0 +1,170 @@
+/*
+ * Mohammad Juma
+ * 
+ * TCSS 305 - Autumn 2012
+ * Project Tetris
+ * November 22, 2012
+ */
+
+package tetris.gui;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+
+/**
+ * The menu bar for the TetrisGUI.
+ * 
+ * @author Mohammad Juma
+ * @version 11-22-2012
+ */
+public class TetrisMenu
+{
+  /**
+   * The frame used to allow the player to edit the controls.
+   */
+  private final TetrisControlsEditor my_controls_editor;
+  
+  /**
+   * The games menu bar.
+   */
+  private final JMenuBar my_menu_bar;
+  
+  /**
+   * The main frame.
+   */
+  private final TetrisGui my_frame;
+
+  /**
+   * Creates a new JMenuBar.
+   * @param the_keys The game controls.
+   * @param the_frame The main frame.
+   */
+  public TetrisMenu(final TetrisGui the_frame, final TetrisControls the_keys)
+  {
+    my_menu_bar = new JMenuBar();
+    my_frame = the_frame;
+    createMenuBar();
+    my_controls_editor = new TetrisControlsEditor(the_keys, the_frame);
+  }
+
+  /**
+   * Returns a created menu bar.
+   * @return my_menu_bar The created menu bar.
+   */
+  public JMenuBar getMenuBar()
+  {
+    return my_menu_bar;
+  }
+
+  /**
+   * Creates the menu bar.
+   */
+  private void createMenuBar()
+  {
+    my_menu_bar.add(tetrisMenu());
+    my_menu_bar.add(optionsMenu());
+    my_menu_bar.add(helpMenu());
+  }
+
+  /**
+   * Creates the file menu.
+   * @return file_menu The file menu.
+   */
+  private JMenu tetrisMenu()
+  {
+    final JMenu tetris_menu = new JMenu("Tetris");
+    
+    final JMenuItem new_game = new JMenuItem("New Game");
+    new_game.addActionListener(new ActionListener()
+    {
+      public void actionPerformed(final ActionEvent the_event)
+      {
+        assert true;
+      }
+    });
+    tetris_menu.add(new_game);
+    
+    final JMenuItem toggle_game = new JMenuItem("Pause Game");
+    tetris_menu.add(toggle_game);
+    final JMenuItem  end_game = new JMenuItem("End Game");
+    tetris_menu.add(end_game);
+    
+    final JMenuItem quit = new JMenuItem("Quit");
+    quit.addActionListener(new ActionListener()
+    {
+      public void actionPerformed(final ActionEvent the_event)
+      {
+        my_frame.dispose();
+      }
+    });
+    tetris_menu.add(quit);
+
+    return tetris_menu;
+  }
+
+  /**
+   * Creates the options menu.
+   * @return options_menu The file menu.
+   */
+  private JMenu optionsMenu()
+  {
+    final JMenu options_menu = new JMenu("Options");
+    
+    final JMenu size_menu = new JMenu("Screen Size");
+    for (final TetrisScreenResolution size: TetrisScreenResolution.values())
+    {
+      final JMenuItem menu_item = new JMenuItem(size.getName());
+      menu_item.addActionListener(new ActionListener()
+      {
+        public void actionPerformed(final ActionEvent the_event)
+        {
+          my_frame.screenSize("small", size.getWidth(), size.getHeight(),
+                              size.getBlockSize());
+        }
+      });
+      size_menu.add(menu_item);
+    }
+    options_menu.add(size_menu);
+    
+    final JMenuItem edit_controls = new JMenuItem("Edit Controls");
+    edit_controls.addActionListener(new ActionListener()
+    {
+      public void actionPerformed(final ActionEvent the_event)
+      {
+        my_controls_editor.setVisible(true);
+      }
+    });
+    options_menu.add(edit_controls);
+
+    return options_menu;
+  }
+
+  /**
+   * Creates the help menu.
+   * @return help_menu The file menu.
+   */
+  private JMenu helpMenu()
+  {
+    final JMenu help_menu = new JMenu("Help");
+    
+    final JMenuItem help = new JMenuItem("How To Play");
+    help_menu.add(help);
+    
+    final JMenuItem about = new JMenuItem("About");
+    about.addActionListener(new ActionListener()
+    {
+      public void actionPerformed(final ActionEvent the_event)
+      {
+        JOptionPane.showMessageDialog(my_frame, "TCSS 305A\nTetris Project");
+      }
+    });
+    help_menu.add(about);
+
+    return help_menu;
+  }
+}

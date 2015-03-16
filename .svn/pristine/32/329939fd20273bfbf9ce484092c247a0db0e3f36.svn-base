@@ -1,0 +1,240 @@
+package tetris.gui;
+
+import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Composite;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+
+import javax.swing.JComponent;
+import javax.swing.JLayer;
+import javax.swing.JPanel;
+import javax.swing.Timer;
+import javax.swing.plaf.LayerUI;
+
+public class TetrisAnimation extends LayerUI<JPanel> implements ActionListener
+{
+  /**
+   * Degrees in a circle.
+   */
+  private static final int DEGREES_IN_CIRCLE = 360;
+  
+  /**
+   * The number of rotations the indicator will perform.
+   */
+  private static final int ROTATIONS = 12;
+  
+  /**
+   * The amount to divide the arc length by.
+   */
+  private static final int ARC_DIVIDER = 5;
+  
+  /**
+   * The amount to increase the angle.
+   */
+  private static final int ANGLE_INCREASE = 3; 
+  
+  /**
+   * The number of frame per second to update the animation.
+   */
+  private static final int FPS = 24;
+  
+  /**
+   * Ticks to update the animation and repaint it.
+   */
+  private static final String TICK = "tick";
+  
+  private boolean mIsRunning;
+  private boolean mIsFadingOut;
+  private Timer mTimer;
+
+  private int mAngle;
+  private int mFadeCount;
+  private int mFadeLimit = 15;
+  
+  /**
+   * Timer for stopping the animation.
+   */
+  private final Timer my_stop_animation_timer;
+  
+  /**
+   * Constructs a new animation JLayer class.
+   */
+  public TetrisAnimation(final TetrisPanel the_game_panel)
+  {
+    super();
+    my_stop_animation_timer = new Timer(2000, new ActionListener() 
+    {
+      public void actionPerformed(final ActionEvent the_event) 
+      {
+        stop();
+        the_game_panel.gameToggle();
+      }
+    });
+    my_stop_animation_timer.setRepeats(false);
+  }
+
+  /**
+   * Paints the animation.
+   * @param the_graphics What to paint.
+   * @param the_component Where to paint it.
+   */
+  public void paint(final Graphics the_graphics, final JComponent the_component) 
+  {
+    final int width = the_component.getWidth();
+    final int height = the_component.getHeight();
+    super.paint(the_graphics, the_component);
+
+    if (!mIsRunning)
+    {
+      return;
+    }
+
+    final Graphics2D g2d = (Graphics2D) the_graphics.create();
+
+    final float fade = (float) mFadeCount / (float) mFadeLimit;
+    grayOutScreen(g2d, width, height, fade);    
+    
+    showIndicator(g2d, width, height, fade);
+
+    g2d.dispose();
+  }
+  
+  /**
+   * Grays out the screen.
+   * @param the_g2d The graphics to paint with.
+   * @param the_width The width of the component.
+   * @param the_height The height of the component.
+   * @param the_fade The amount to fade.
+   */
+  private void grayOutScreen(final Graphics2D the_g2d, final int the_width,
+                             final int the_height, final float the_fade)
+  {
+    final Composite composite = the_g2d.getComposite();
+    the_g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, the_fade / 2f));
+    the_g2d.fillRect(0, 0, the_width, the_height);
+    the_g2d.setComposite(composite);
+  }
+  
+  /**
+   * Displays the wait indicator.   
+   * @param the_g2d The graphics to paint with.
+   * @param the_width The width of the component.
+   * @param the_height The height of the component.
+   * @param the_fade The amount to fade.
+   */
+  private void showIndicator(final Graphics2D the_g2d, final int the_width,
+                             final int the_height, final float the_fade)
+  {
+    final int arc_length = Math.min(the_width, the_height) / ARC_DIVIDER;
+    final int center_x = the_width / 2;
+    final int center_y = the_height / 2;
+    the_g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+        RenderingHints.VALUE_ANTIALIAS_ON);
+    the_g2d.setStroke(
+        new BasicStroke(arc_length / (ARC_DIVIDER - 1),
+                        BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+    the_g2d.setPaint(Color.white);
+    the_g2d.rotate(Math.PI * mAngle / (DEGREES_IN_CIRCLE / 2), center_x, center_y);
+    for (int i = 0; i < ROTATIONS; i++) 
+    {
+      final float scale = ((ROTATIONS - 1) - (float) i) / (ROTATIONS - 1);
+      the_g2d.drawLine(center_x + arc_length, center_y, center_x + arc_length * 2, center_y);
+      the_g2d.rotate(-Math.PI / (ROTATIONS / 2), center_x, center_y);
+      the_g2d.setComposite(AlphaComposite.getInstance(
+          AlphaComposite.SRC_OVER, scale * the_fade));
+    }
+  }
+
+  /**
+   * Performs the fading and the wait indicator.
+   * @param the_event The event that happened.
+   */
+  public void actionPerformed(final ActionEvent the_event) 
+  {
+    if (mIsRunning) 
+    {
+      firePropertyChange(TICK, 0, 1);
+      mAngle += ANGLE_INCREASE;
+      if (mAngle >= DEGREES_IN_CIRCLE) 
+      {
+        mAngle = 0;
+      }
+      if (mIsFadingOut) 
+      {
+        if (--mFadeCount == 0) 
+        {
+          mIsRunning = false;
+          mTimer.stop();
+        }
+      }
+      else if (mFadeCount < mFadeLimit) 
+      {
+        mFadeCount++;
+      }
+    }
+  }
+
+  /**
+   * Starts the timer.
+   */
+  public void start() 
+  {
+    if (mIsRunning) 
+    {
+      return;
+    }
+    
+    // Run a thread for animation.
+    mIsRunning = true;
+    mIsFadingOut = false;
+    mFadeCount = 0;
+    final int tick = 1000 / FPS;
+    mTimer = new Timer(tick, this);
+    mTimer.start();
+  }
+
+  /**
+   * Stops the timer.
+   */
+  public void stop() 
+  {
+    mIsFadingOut = true;
+  }
+  
+  /**
+   * Returns whether or not the animation is running.
+   * @return True if the animation is running.
+   */
+  public boolean isRunning()
+  {
+    return my_stop_animation_timer.isRunning();
+  }
+  
+  /**
+   * Starts the animation.
+   */
+  public void startRunning()
+  {
+    my_stop_animation_timer.start();
+  }
+
+  /**
+   * Repaints the JLayer as needed.
+   * @param the_pce The event calling for a repaint.
+   * @param the_layer The layer to repaint.
+   */
+  public void applyPropertyChange(final PropertyChangeEvent the_pce, 
+                                  final JLayer<? extends JPanel> the_layer) 
+  {
+    if (TICK.equals(the_pce.getPropertyName())) 
+    {
+      the_layer.repaint();
+    }
+  }
+}

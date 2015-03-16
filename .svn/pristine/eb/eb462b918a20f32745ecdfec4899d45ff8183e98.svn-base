@@ -1,0 +1,579 @@
+/*
+ * Mohammad Juma
+ * 
+ * TCSS 305 - Autumn 2012
+ * Project Tetris
+ * November 11, 2012
+ */
+
+package tetris.board;
+
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Observable;
+
+import tetris.pieces.Tetromino;
+import tetris.pieces.Tetrominos;
+import tetris.utilities.Copy;
+
+/**
+ * The Tetris Board Class.
+ * 
+ * @author Mohammad Juma
+ * @version 11-11-2012
+ */
+public class Board extends Observable
+{
+  /**
+   * The default width of the Tetris board.
+   */
+  private static final int DEFAULT_WIDTH = 10;
+
+  /**
+   * The default height of the tetris board.
+   */
+  private static final int DEFAULT_HEIGHT = 20;
+
+  /**
+   * The number of Tetrominos to store in the sequence.
+   * 1 for the next Tetromino and 4 for the four following it.
+   */
+  private static final int SEQUENCE_SIZE = 5;
+
+  /**
+   * Y coordinate above the board the Tetromino starts at.
+   */
+  private static final int Y_START = -4;
+
+  /**
+   * X coordinate the Tetromino starts at.
+   */
+  private final int my_x_start;
+
+  /**
+   * Copies 2D arrays.
+   */
+  private final Copy my_copy = new Copy();
+
+  /**
+   * The width of the Tetris board. Default is 10.
+   */
+  private final int my_width;
+
+  /**
+   * The height of the Tetris board. Default is 20
+   */
+  private final int my_height;
+
+  /**
+   * A List for holding the pre generated Tetrominos.
+   */
+  private final List<Tetromino> my_tetrominos = new ArrayList<Tetromino>();
+
+  /**
+   * The Tetromino currently being used from the pre generated List.
+   */
+  private int my_current_element;
+
+  /**
+   * The sequence of Tetrominos to be played next.
+   */
+  private final List<Tetromino> my_sequence = new ArrayList<Tetromino>();
+  
+  /**
+   * The Tetromino currently being help out of play.
+   */
+  private Tetromino my_held_tetromino;
+
+  /**
+   * An List of color arrays representing the Tetris board.
+   */
+  private List<Color[]> my_board;
+
+  /**
+   * The current Tetromino in play.
+   */
+  private Tetromino my_tetromino;
+  
+  /**
+   * The state of the game. False only when the game is over.
+   */
+  private boolean my_game_state;
+
+  /**
+   * Creates a new board with defaults.
+   */
+  public Board()
+  {
+    super();
+    my_width = DEFAULT_WIDTH;
+    my_height = DEFAULT_HEIGHT;
+    my_x_start = (my_width / 2) - 2;
+    my_board = new ArrayList<Color[]>();
+    createBoard();
+    fillSequence();
+    my_tetromino = newTetromino();
+    my_game_state = true;
+  }
+
+  /**
+   * Creates a new board with custom size.
+   * @param the_width The width in blocks of the new board.
+   * @param the_height The height in blocks of the new board.
+   */
+  public Board(final int the_width, final int the_height)
+  {
+    super();
+    my_width = the_width;
+    my_height = the_height;
+    my_x_start = (my_width / 2) - 2;
+    my_board = new ArrayList<Color[]>();
+    createBoard();
+    fillSequence();
+    my_tetromino = newTetromino();
+    my_game_state = true;
+  }
+
+  /**
+   * Updates the board by one step.
+   * @return Whether the Board can update the piece or has to freeze.
+   */
+  public boolean step()
+  {
+    boolean stepped = true;
+    if (!my_game_state)
+    {
+      stepped = false;
+    }
+    else if (!moveDown())
+    {
+      my_board = freezeTetromino();
+      clearLines();
+      my_tetromino = newTetromino();
+      stepped = false;
+      setChanged();
+    }
+    setChanged();
+    notifyObservers(stepped);
+    return stepped;
+  }
+
+  /**
+   * Attempts to move the Tetromino left by checking for collisions first.
+   * @return Whether the Tetromino can be moved or not.
+   */
+  public boolean moveLeft()
+  {
+    boolean movable = false;
+    final Tetromino moved_left = (Tetromino) my_tetromino.moveLeft();
+    if (!isColliding(moved_left))
+    {
+      my_tetromino = moved_left;
+      movable = true;
+      setChanged();
+      notifyObservers(movable);
+    }
+    return movable;
+  }
+
+  /**
+   * Attempts to move the Tetromino right by checking for collisions first.
+   * @return Whether the Tetromino can be moved or not.
+   */
+  public boolean moveRight()
+  {
+    boolean movable = false;
+    final Tetromino moved_right = (Tetromino) my_tetromino.moveRight();
+    if (!isColliding(moved_right))
+    {
+      my_tetromino = moved_right;
+      movable = true;
+      setChanged();
+      notifyObservers(movable);
+    }
+    return movable;
+  }
+
+  /**
+   * Attempts to move the Tetromino down by checking for collisions first.
+   * @return Whether the Tetromino can be moved or not.
+   */
+  public boolean moveDown()
+  {
+    boolean movable = false;
+    final Tetromino moved_down = (Tetromino) my_tetromino.moveDown();
+    if (!isColliding(moved_down))
+    {
+      my_tetromino = moved_down;
+      movable = true;
+      setChanged();
+      notifyObservers(movable);
+    }
+    return movable;
+  }
+
+  /**
+   * Moves the current piece all the way to the bottom 
+   * of the board or until it hits another piece.
+   */
+  public void drop()
+  {
+    while (step())
+    {
+      if (!step())
+      {
+        break;
+      }
+    }
+  }
+
+  /**
+   * Attempts to rotate the Tetromino by checking for collisions first.
+   * @return Whether the Tetromino can be rotated or not.
+   */
+  public boolean rotate()
+  {
+    boolean rotatable = false;
+    final Tetromino rotated = (Tetromino) my_tetromino.rotate();
+    if (!isColliding(rotated))
+    {
+      my_tetromino = rotated;
+      rotatable = true;
+      setChanged();
+      notifyObservers(rotatable);
+    }
+    return rotatable;
+  }
+
+  /**
+   * Attempts to rotate the Tetromino clockwise by checking for collisions first.
+   * @return Whether the Tetromino can be rotated or not.
+   */
+  public boolean rotateCW()
+  {
+    boolean rotatable = false;
+    final Tetromino rotated = (Tetromino) my_tetromino.rotateCW();
+    if (!isColliding(rotated))
+    {
+      my_tetromino = rotated;
+      rotatable = true;
+      setChanged();
+      notifyObservers(rotatable);
+    }
+    return rotatable;
+  }
+
+  /**
+   * Returns the board for painting.
+   * @return my_board The current game board.
+   */
+  public List<Color[]> getBoard()
+  {
+    return Collections.unmodifiableList(my_board);
+  }
+
+  /**
+   * Returns the current Tetromino for painting.
+   * @return my_tetromino The current Tetromino.
+   */
+  public Tetromino getTetromino()
+  {
+    return my_tetromino;
+  }
+  
+  /**
+   * Returns a sequence of the next 5 Tetrominos to be played.
+   * @return my_sequence The sequence of the next 5 Tetrominos.
+   */
+  public List<Tetromino> getSequence()
+  {
+    return Collections.unmodifiableList(my_sequence);
+  }
+
+  /**
+   * The width of the board in Tetrominos.
+   * @return my_width The width of the board.
+   */
+  public int getWidth()
+  {
+    return my_width;
+  }
+
+  /**
+   * The height of the board in Tetrominos.
+   * @return my_height The height of the board.
+   */
+  public int getHeight()
+  {
+    return my_height;
+  }
+  
+  /**
+   * Returns the state of the game.
+   * False if the game is over.
+   * @return my_game_state The state of the game.
+   */
+  public boolean gameState()
+  {
+    return my_game_state;
+  }
+  
+  /**
+   * Holds the current Tetromino.
+   */
+  public void hold()
+  {
+    if (my_held_tetromino == null)
+    {
+      my_held_tetromino = my_tetromino;
+      my_tetromino = newTetromino();
+    }
+    else
+    {
+      final Tetromino temp = my_tetromino;
+      my_tetromino = my_held_tetromino;
+      my_held_tetromino = temp;
+    }
+    setChanged();
+    notifyObservers(my_held_tetromino);
+  }
+
+  /**
+   * Sets the pre defined set of Tetrominos to use in game play.
+   * @param the_tetrominos The array of Tetrominos.
+   */
+  public void setTetrominos(final Tetrominos[] the_tetrominos)
+  {
+    for (int i = 0; i < the_tetrominos.length; i++)
+    {
+      my_tetrominos.add(new Tetromino(my_x_start, Y_START,
+                                      the_tetrominos[i].getTetromino(),
+                                      the_tetrominos[i].getColor()));
+    }
+    my_current_element = 0;
+    my_tetromino = newTetromino();
+  }
+
+  /**
+   * Returns a string representation of the board.
+   * @return sb.toString()
+   */
+  public String toString()
+  {
+    final List<Color[]> string_board = freezeTetromino();
+    final StringBuilder sb = new StringBuilder();
+
+    for (int n = 0; n < string_board.size(); n++)
+    {
+      sb.append('[');
+      for (int m = 0; m < string_board.get(n).length; m++)
+      {
+        if (string_board.get(n)[m] == Color.DARK_GRAY)
+        {
+          sb.append('0');
+        }
+        else
+        {
+          sb.append('1');
+        }
+
+        if (m != string_board.get(n).length - 1)
+        {
+          sb.append(", ");
+        }
+      }
+      sb.append(']').append('\n');
+    }
+    return sb.toString();
+  }
+
+  /**
+   * Creates a new Board.
+   */
+  private void createBoard()
+  {
+    final Color[] row = newRow();
+    for (int r = 0; r < my_height; r++)
+    {
+      my_board.add(row);
+    }
+  }
+
+  /**
+   * Creates a new row of colors for the board.
+   * @return row The new row of colors.
+   */
+  private Color[] newRow()
+  {
+    final Color[] row = new Color[my_width];
+    for (int i = 0; i < my_width; i++)
+    {
+      row[i] = Color.DARK_GRAY;
+    }
+    return row;
+  }
+
+  /**
+   * Generates a new Tetromino, either randomly or specifically.
+   * @return new_tetromino The newly generated Tetromino.
+   */
+  private Tetromino newTetromino()
+  {
+    final Tetromino new_tetromino = my_sequence.get(0);
+    my_sequence.remove(0);
+    fillSequence();
+    setChanged();
+    notifyObservers(my_sequence);
+    return new_tetromino;
+  }
+
+  /**
+   * Fills the sequence of the next set of Tetrominos to be played. 
+   * Either randomly or from the generated list.
+   */
+  private void fillSequence()
+  {
+    while (my_sequence.size() < SEQUENCE_SIZE)
+    {
+      Tetromino next_tetromino = null;
+
+      if (my_tetrominos.isEmpty() || my_current_element >= my_tetrominos.size())
+      {
+        next_tetromino = randomTetromino();
+      }
+      else if (!my_tetrominos.isEmpty() && my_current_element < my_tetrominos.size())
+      {
+        next_tetromino = my_tetrominos.get(my_current_element);
+        my_current_element++;
+      }
+      my_sequence.add(next_tetromino);
+    }
+    setChanged();
+    notifyObservers(my_sequence);
+  }
+
+  /**
+   * Creates a new random Tetromino.
+   * @return A random Tetromino.
+   */
+  private Tetromino randomTetromino()
+  {
+    final Tetrominos random = Tetrominos.random();
+    return new Tetromino(my_x_start, Y_START, random.getTetromino(), random.getColor());
+  }
+
+  /**
+   * Checks the Tetromino passed into it to see if its block coordinates 
+   * collide with frozen blocks or the boards edges.
+   * @param the_tetromino The changed Tetromino to test.
+   * @return collided Whether or not the Tetromino collides.
+   */
+  private boolean isColliding(final Tetromino the_tetromino)
+  {
+    boolean collided = false;
+
+    for (int i = 0; i < the_tetromino.points().length; i++)
+    {
+      final int x = the_tetromino.points()[i].x;
+      final int y = the_tetromino.points()[i].y;
+
+      if (y < 0 && x >= 0 && x < my_width)
+      {
+        // If its below the y axis but not outside the x boundaries then it may continue.
+        // This avoids having a negative y which can lead to an out of bounds error.
+        // This also allows the player to rotate the piece while it is still above the board.
+        continue;
+      }
+      if (y == 0)
+      {
+        my_game_state ^= gameOver(y, my_board.get(y)[x]);
+      }
+      if (y < 0 || isOutOfBounds(x, y) || my_board.get(y)[x] != Color.DARK_GRAY)
+      {
+        collided = true;
+        break;
+      }
+    }
+    return collided;
+  }
+
+  /**
+   * Checks the Tetromino block for out of bounds movement.
+   * @param the_x The x coordinate of the Tetromino block.
+   * @param the_y The y coordinate of the Tetromino block.
+   * @return result If true the Tetromino block is out of bounds.
+   */
+  private boolean isOutOfBounds(final int the_x, final int the_y)
+  {
+    return the_x < 0 || the_x >= my_width || the_y >= my_height;
+  }
+  
+  /**
+   * Checks Tetrominos blocks to see if any Tetrominos extend above the top of the board.
+   * @param the_y The y position of the Tetromino block.
+   * @param the_color The color of the block the Tetromino is trying to move to.
+   * @return game_over Returns true if the game is over.
+   */
+  private boolean gameOver(final int the_y, final Color the_color)
+  {
+    boolean game_over = false;
+    if (the_y == 0 && the_color != Color.DARK_GRAY)
+    {
+      game_over = true;
+    }
+    return game_over;
+  }
+
+  /**
+   * Adds the Tetromino blocks to the Tetris board.
+   * @return Returns a new List with the Tetromino frozen on the board.
+   */
+  private List<Color[]> freezeTetromino()
+  {
+    final List<Color[]> new_board = my_copy.copyBoard(my_board);
+
+    for (int i = 0; i < my_tetromino.points().length; i++)
+    {
+      if (my_tetromino.points()[i].y >= 0)
+      {
+        final Color[] row = new_board.get(my_tetromino.points()[i].y);
+        row[my_tetromino.points()[i].x] = my_tetromino.getColor();
+        new_board.set(my_tetromino.points()[i].y, row);
+      }
+    }
+    return new_board;
+  }
+
+  /**
+   * Check the board to see if any rows are filled.
+   */
+  private void clearLines()
+  {
+    Color[] current_row;
+    int rows_cleared = 0;
+
+    for (int r = 0; r < my_height; r++)
+    {
+      current_row = my_board.get(r);
+      boolean row_filled = true;
+      for (int i = 0; i < current_row.length; i++)
+      {
+        if (current_row[i] == Color.DARK_GRAY)
+        {
+          row_filled = false;
+          break;
+        }
+      }
+      if (row_filled)
+      {
+        my_board.remove(r);
+        my_board.add(0, newRow());
+        rows_cleared++;
+        setChanged();
+      }
+    }
+    notifyObservers(rows_cleared);
+  }
+}

@@ -1,0 +1,79 @@
+/*
+ * Mohammad Juma
+ * 
+ * TCSS 305 - Autumn 2012
+ * Project Tetris
+ * October 26, 2012
+ */
+
+package tetris.pieces;
+
+/**
+ * Tetromino Enum Class.
+ * 
+ * @author Mohammad Juma
+ * @version 10-26-2012
+ */
+public enum Tetrominos
+{
+  /**
+   * Matrix representation of the I tetromino.
+   */
+  I(new int[][] {{0, 1, 0, 0}, {0, 2, 0, 0}, {0, 3, 0, 0}, {0, 4, 0, 0}}),
+  
+  /**
+   * Matrix representation of the L tetromino.
+   */
+  L(new int[][] {{0, 1, 0}, {0, 2, 0}, {0, 3, 4}}),
+  
+  /**
+   * Matrix representation of the J tetromino.
+   */
+  J(new int[][] {{0, 1, 0}, {0, 2, 0}, {4, 3, 0}}),
+  
+  /**
+   * Matrix representation of the S tetromino.
+   */
+  S(new int[][] {{0, 2, 1}, {4, 3, 0}, {0, 0, 0}}),
+  
+  /**
+   * Matrix representation of the Z tetromino.
+   */
+  Z(new int[][] {{1, 2, 0}, {0, 3, 4}, {0, 0, 0}}),
+  
+  /**
+   * Matrix representation of the T tetromino.
+   */
+  T(new int[][] {{0, 0, 0}, {0, 1, 0}, {2, 3, 4}}),
+  
+  /**
+   * Matrix representation of the O tetromino.
+   */
+  O(new int[][] {{0, 0, 0}, {1, 2, 0}, {3, 4, 0}});
+  
+  /**
+   * Tetrominos are all type 2d array.
+   */
+  private int[][] my_tetromino;
+  
+  /**
+   * Tetromino Enum Piece Constructor.
+   * @param the_tetromino Tetromino desired
+   */
+  private Tetrominos(final int[][] the_tetromino)
+  {
+    //my_tetromino = the_tetromino; TODO
+    my_tetromino = new int[the_tetromino.length][the_tetromino[0].length];
+    System.arraycopy(the_tetromino, 0, my_tetromino, 0, the_tetromino.length);
+  }
+  
+  /**
+   * Returns a 2d matrix representation of a tetromino.
+   * @return my_tetromino
+   */
+  public int[][] getTetromino()
+  {
+    // return my_tetromino; TODO
+    return (int[][]) my_tetromino.clone();
+  }
+}

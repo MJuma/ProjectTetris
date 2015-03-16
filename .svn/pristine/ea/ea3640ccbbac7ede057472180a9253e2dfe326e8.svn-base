@@ -1,0 +1,108 @@
+package tetris.pieces;
+
+/**
+ * Main class for testing tetromino behavior.
+ * @author Mohammad Juma
+ * @version 1
+ */
+public final class TestClass
+{
+  /**
+   * Number of rotations to return to initial position.
+   */
+  private static final int NUMBER_OF_ROTATIONS = 4;
+  
+  /**
+   * Starting coordinates.
+   */
+  private static final int COORDINATES = 5;
+  
+  /**
+   * Coordinates separator.
+   */
+  private static final String SEPARATOR = ", ";
+  
+  /**
+   * Close parentheses.
+   */
+  private static final char CLOSEPAREN = ')';
+  
+  /**
+   * Names of each tetromino piece.
+   */
+  private static final char[] TETROMINO_NAMES = new char[] {'I', 'L', 'J', 'S', 'Z', 'O', 'T'};
+  
+  /**
+   * Array of all the tetromino's to test.
+   */
+  private static int[][][] my_tetros_array = new int[][][]
+  {Tetrominos.I.getTetromino(), Tetrominos.L.getTetromino(), Tetrominos.J.getTetromino(),
+    Tetrominos.S.getTetromino(), Tetrominos.Z.getTetromino(), Tetrominos.O.getTetromino(),
+    Tetrominos.T.getTetromino()};
+  
+  /**
+   * Current tetromino being tested.
+   */
+  private static Tetromino my_tetromino;
+  
+  /**
+   * Does nothing.
+   */
+  private TestClass()
+  {
+    // Does nothing.
+  }
+
+  /**
+   * Main class for testing tetromino behavior.
+   * @param the_args Ignored
+   */
+  public static void main(final String... the_args)
+  {
+    for (int i = 0; i < my_tetros_array.length; i++)
+    {
+      my_tetromino = new Tetromino(COORDINATES, COORDINATES, my_tetros_array[i]);
+      Tetromino new_tetromino = my_tetromino;
+      
+      print("=== " + TETROMINO_NAMES[i] + " Tetromino ===\nRotation 0 Time(s):", true);
+      print(my_tetromino.toString(), false);
+      for (int j = 0; j < NUMBER_OF_ROTATIONS; j++)
+      {
+        print("Rotated " + (j + 1) + " Time(s)", true);
+        new_tetromino = (Tetromino) new_tetromino.rotate();
+        print(new_tetromino.toString(), false);
+      }
+      print("", true);
+    }
+    
+    for (int i = 0; i < my_tetros_array.length; i++)
+    {
+      my_tetromino = new Tetromino(COORDINATES, COORDINATES, my_tetros_array[i]);      
+      print("Initial X and Y: (" + my_tetromino.x() + SEPARATOR +
+            my_tetromino.y() + CLOSEPAREN, true);
+      print("Moved left X and Y: (" + my_tetromino.moveLeft().x() +
+            SEPARATOR + my_tetromino.moveLeft().y() + CLOSEPAREN, true);
+      print("Moved right X and Y: (" + my_tetromino.moveRight().x() +
+            SEPARATOR + my_tetromino.moveRight().y() + CLOSEPAREN, true);
+      print("Moved down X and Y: (" + my_tetromino.moveDown().x() +
+            SEPARATOR + my_tetromino.moveDown().y() + CLOSEPAREN + "\n", true);
+    }
+  }
+  
+  /**
+   * Prints the input to console.
+   * @param the_string String to print
+   * @param the_return New line or not boolean
+   */
+  public static void print(final String the_string, final boolean the_return)
+  {
+    if (the_return)
+    {
+      System.out.println(the_string);
+    }
+    else
+    {
+      System.out.print(the_string);
+    }
+  }
+}
